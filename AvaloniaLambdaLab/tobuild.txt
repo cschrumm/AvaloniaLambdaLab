@@ -1,0 +1,11 @@
+
+1. sudo add-apt-repository ppa:dotnet/backports
+2. sudo apt update && sudo apt install dotnet9
+2. build dotnet publish -c Release -r <RID> --self-contained true
+3. sudo apt-get install git
+4. copy the ssh key to the server
+5. git clone the repo
+6. cd to the folder
+7. build dotnet publish -c Release -r <RID> --self-contained true
+8. Open the port in the firewall
+9. dotnet run --urls "http://localhost:7777"

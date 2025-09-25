@@ -1,0 +1,14 @@
+{
+  "version": 2,
+  "dgSpecHash": "tnVacJMJ2LM=",
+  "success": true,
+  "projectFilePath": "/home/madmax-machine/Documents/mycode/AvaloniaLambdaLab/WebPerfmon/WebPerfmon.csproj",
+  "expectedPackageFiles": [
+    "/home/madmax-machine/.nuget/packages/microsoft.dotnet.ilcompiler/9.0.5/microsoft.dotnet.ilcompiler.9.0.5.nupkg.sha512",
+    "/home/madmax-machine/.nuget/packages/microsoft.net.illink.tasks/9.0.5/microsoft.net.illink.tasks.9.0.5.nupkg.sha512",
+    "/home/madmax-machine/.nuget/packages/system.codedom/9.0.9/system.codedom.9.0.9.nupkg.sha512",
+    "/home/madmax-machine/.nuget/packages/system.management/9.0.9/system.management.9.0.9.nupkg.sha512",
+    "/home/madmax-machine/.nuget/packages/runtime.linux-x64.microsoft.dotnet.ilcompiler/9.0.5/runtime.linux-x64.microsoft.dotnet.ilcompiler.9.0.5.nupkg.sha512"
+  ],
+  "logs": []
+}

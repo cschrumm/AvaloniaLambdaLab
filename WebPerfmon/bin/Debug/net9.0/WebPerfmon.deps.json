@@ -1,0 +1,85 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v9.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v9.0": {
+      "WebPerfmon/1.0.0": {
+        "dependencies": {
+          "Microsoft.DotNet.ILCompiler": "9.0.5",
+          "Microsoft.NET.ILLink.Tasks": "9.0.5",
+          "System.Management": "9.0.9"
+        },
+        "runtime": {
+          "WebPerfmon.dll": {}
+        }
+      },
+      "Microsoft.DotNet.ILCompiler/9.0.5": {},
+      "Microsoft.NET.ILLink.Tasks/9.0.5": {},
+      "System.CodeDom/9.0.9": {
+        "runtime": {
+          "lib/net9.0/System.CodeDom.dll": {
+            "assemblyVersion": "9.0.0.0",
+            "fileVersion": "9.0.925.41916"
+          }
+        }
+      },
+      "System.Management/9.0.9": {
+        "dependencies": {
+          "System.CodeDom": "9.0.9"
+        },
+        "runtime": {
+          "lib/net9.0/System.Management.dll": {
+            "assemblyVersion": "9.0.0.9",
+            "fileVersion": "9.0.925.41916"
+          }
+        },
+        "runtimeTargets": {
+          "runtimes/win/lib/net9.0/System.Management.dll": {
+            "rid": "win",
+            "assetType": "runtime",
+            "assemblyVersion": "9.0.0.9",
+            "fileVersion": "9.0.925.41916"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "WebPerfmon/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Microsoft.DotNet.ILCompiler/9.0.5": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-rfDodV68TLSUgVM6ZQusuUXD7GAIqwCKJWlPtfsd99iLlLbeGfqUQE7Xo8xLa1ju5GCdSBO0q35suzZ8ppclpA==",
+      "path": "microsoft.dotnet.ilcompiler/9.0.5",
+      "hashPath": "microsoft.dotnet.ilcompiler.9.0.5.nupkg.sha512"
+    },
+    "Microsoft.NET.ILLink.Tasks/9.0.5": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-4L7wbb3Y4BJgIeSnmAf/C6S/qCs9rT1b0dX72uj3qo0qvUH7D0U1tU5ZlC7A3Wb8E/dXK4caOi4JkdLTVJaXhw==",
+      "path": "microsoft.net.illink.tasks/9.0.5",
+      "hashPath": "microsoft.net.illink.tasks.9.0.5.nupkg.sha512"
+    },
+    "System.CodeDom/9.0.9": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-Az4ngSi0MO3Qwu1+BJRHnc2C8e7+x0oXj+Q++C/wru0vM8J2oL3QlliiZPdwPnR0VbiL0lH7izSIGQssMaRiGQ==",
+      "path": "system.codedom/9.0.9",
+      "hashPath": "system.codedom.9.0.9.nupkg.sha512"
+    },
+    "System.Management/9.0.9": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-U+OnvxuFi/V0++P98Auba1pAyaOXU5EioSz0xczgFsB7l/sPX9Ix4rWwI+lXJG4/icPieeRsfpXPEIcSBTQShw==",
+      "path": "system.management/9.0.9",
+      "hashPath": "system.management.9.0.9.nupkg.sha512"
+    }
+  }
+}

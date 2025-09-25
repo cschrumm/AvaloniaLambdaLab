@@ -1,0 +1,150 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="AvaloniaLambdaLab.MainWindow"
+        Title="Avalonia GUI Application"
+        Width="800"
+        Height="600"
+        x:Name="MyWindow">
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Top section with dropdowns -->
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="20" Margin="0,0,0,20">
+            <StackPanel>
+                <TextBlock Text="Option 1:" Margin="0,0,0,5"/>
+                <ComboBox Name="DropDown1" 
+                          Width="150" 
+                          SelectionChanged="DropDown1_SelectionChanged">
+                    <ComboBoxItem Content="Choice A"/>
+                    <ComboBoxItem Content="Choice B"/>
+                    <ComboBoxItem Content="Choice C"/>
+                    <ComboBoxItem Content="Choice D"/>
+                </ComboBox>
+            </StackPanel>
+
+            <StackPanel>
+                <TextBlock Text="Option 2:" Margin="0,0,0,5"/>
+                <ComboBox Name="DropDown2" 
+                          Width="150" 
+                          SelectionChanged="DropDown2_SelectionChanged">
+                    <ComboBoxItem Content="Setting 1"/>
+                    <ComboBoxItem Content="Setting 2"/>
+                    <ComboBoxItem Content="Setting 3"/>
+                    <ComboBoxItem Content="Setting 4"/>
+                </ComboBox>
+            </StackPanel>
+
+            <StackPanel>
+                <TextBlock Text="Option 3:" Margin="0,0,0,5"/>
+                <ComboBox Name="DropDown3" 
+                          Width="150" 
+                          SelectionChanged="DropDown3_SelectionChanged">
+                    <ComboBoxItem Content="Mode 1"/>
+                    <ComboBoxItem Content="Mode 2"/>
+                    <ComboBoxItem Content="Mode 3"/>
+                    <ComboBoxItem Content="Mode 4"/>
+                </ComboBox>
+            </StackPanel>
+        </StackPanel>
+
+        <!-- Button section -->
+        <StackPanel Grid.Row="1" 
+                    Orientation="Horizontal" 
+                    HorizontalAlignment="Center" 
+                    Spacing="20" 
+                    Margin="0,0,0,20">
+            <Button Name="StartButton"
+                    Content="Start"
+                    Width="100"
+                    Height="35"
+                    Background="Green"
+                    Foreground="White"
+                    IsEnabled="{Binding ElementName=MyWindow, Path=IsRunning}"
+                    Click="StartButton_Click"/>
+            
+            <Button Name="StopButton"
+                    Content="Stop"
+                    Width="100"
+                    Height="35"
+                    Background="Red"
+                    Foreground="White"
+                    IsEnabled="{Binding ElementName=MyWindow, Path=IsRunning}"
+                    Click="StopButton_Click"/>
+        </StackPanel>
+
+        <!-- Graph section -->
+        <Border Grid.Row="2" 
+                BorderBrush="Gray" 
+                BorderThickness="1" 
+                CornerRadius="5">
+            <Grid Margin="10">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Row="0" 
+                           Text="Data Visualization" 
+                           FontSize="16" 
+                           FontWeight="Bold" 
+                           HorizontalAlignment="Center" 
+                           Margin="0,0,0,10"/>
+
+                <!-- Simple graph representation using Canvas -->
+                <Canvas Grid.Row="1" 
+                        Name="GraphCanvas"
+                        Background="LightGray"
+                        MinHeight="300">
+                    
+                    <!-- Grid lines for the graph -->
+                    <Rectangle Width="1" 
+                               Height="300"
+                               Canvas.Left="50"
+                               Fill="Black"
+                               Opacity="0.3"/>
+                    
+                    <Rectangle Height="1" 
+                               Width="400"
+                               Canvas.Bottom="50"
+                               Fill="Black"
+                               Opacity="0.3"/>
+
+                    <!-- Y-axis labels -->
+                    <TextBlock Text="100" Canvas.Left="20" Canvas.Top="50"/>
+                    <TextBlock Text="75" Canvas.Left="25" Canvas.Top="100"/>
+                    <TextBlock Text="50" Canvas.Left="25" Canvas.Top="150"/>
+                    <TextBlock Text="25" Canvas.Left="25" Canvas.Top="200"/>
+                    <TextBlock Text="0" Canvas.Left="30" Canvas.Bottom="45"/>
+
+                    <!-- X-axis labels -->
+                    <TextBlock Text="0" Canvas.Left="45" Canvas.Bottom="25"/>
+                    <TextBlock Text="2" Canvas.Left="100" Canvas.Bottom="25"/>
+                    <TextBlock Text="4" Canvas.Left="150" Canvas.Bottom="25"/>
+                    <TextBlock Text="6" Canvas.Left="200" Canvas.Bottom="25"/>
+                    <TextBlock Text="8" Canvas.Left="250" Canvas.Bottom="25"/>
+
+                    <!-- Sample data points -->
+                    <Ellipse Width="8" Height="8" Fill="Blue" Canvas.Left="46" Canvas.Top="180"/>
+                    <Ellipse Width="8" Height="8" Fill="Blue" Canvas.Left="75" Canvas.Top="120"/>
+                    <Ellipse Width="8" Height="8" Fill="Blue" Canvas.Left="100" Canvas.Top="140"/>
+                    <Ellipse Width="8" Height="8" Fill="Blue" Canvas.Left="125" Canvas.Top="90"/>
+                    <Ellipse Width="8" Height="8" Fill="Blue" Canvas.Left="150" Canvas.Top="110"/>
+                    <Ellipse Width="8" Height="8" Fill="Blue" Canvas.Left="175" Canvas.Top="80"/>
+                    <Ellipse Width="8" Height="8" Fill="Blue" Canvas.Left="200" Canvas.Top="160"/>
+                    <Ellipse Width="8" Height="8" Fill="Blue" Canvas.Left="225" Canvas.Top="130"/>
+
+                    <!-- Connecting lines between points -->
+                    <Polyline Points="50,184 79,124 104,144 129,94 154,114 179,84 204,164 229,134"
+                              Stroke="Blue"
+                              StrokeThickness="2"
+                              Fill="Transparent"/>
+                </Canvas>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>
