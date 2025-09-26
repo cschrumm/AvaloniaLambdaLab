@@ -2,7 +2,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:lvc="using:LiveChartsCore.SkiaSharpView.Avalonia"
         x:Class="AvaloniaLambdaLab.MainWindow"
-        Title="Avalonia GUI Application"
+        Title="Lambda Cloud View"
         Width="800"
         Height="600"
         x:Name="MyWindow">
@@ -45,7 +45,7 @@
                 </ComboBox>
             </StackPanel>
             <StackPanel>
-                <TextBlock Text="Selected Local Key For Git:" Margin="0,0,0,5"/>
+                <TextBlock Text="Key For Git:" Margin="0,0,0,5"/>
                 <TextBox Name="GitKey" Width="125"></TextBox>
             </StackPanel>
             <StackPanel>
@@ -67,7 +67,7 @@
                     Background="Green"
                     Foreground="White"
                     IsEnabled="{Binding ElementName=MyWindow, Path=IsNotRunning}"
-                    Click="StartButton_Click"/>
+                    Click="StartButton_Click" UseLayoutRounding="True"/>
             <Button Name="StopButton"
                     Content="Stop"
                     Width="100"
@@ -75,7 +75,7 @@
                     Background="Red"
                     Foreground="White"
                     IsEnabled="{Binding ElementName=MyWindow, Path=IsRunning}"
-                    Click="StopButton_Click"/>
+                    Click="StopButton_Click" UseLayoutRounding="True" />
         </StackPanel>
 
         <!-- Graph section -->
@@ -96,7 +96,7 @@
                            FontWeight="Bold" 
                            HorizontalAlignment="Center" 
                            Margin="0,0,0,10"></TextBlock>
-                <TextBlock Grid.Row="1" Grid.Column="0" Background="LightGray"></TextBlock>
+                <TextBlock Grid.Row="1" Grid.Column="0" Background="LightGray" Margin="1,1,1,1"></TextBlock>
                 <TextBlock Grid.Row="0"  Grid.Column="1"
                            Text="System Performance Graph" 
                            FontSize="16" 
@@ -105,7 +105,7 @@
                            Margin="0,0,0,10"/>
 
                 <!-- Simple graph representation using Canvas -->
-                <lvc:CartesianChart Grid.Row="1" Grid.Column="1"></lvc:CartesianChart>
+                <lvc:CartesianChart  Grid.Row="1" Grid.Column="1"></lvc:CartesianChart>
             </Grid>
         </Border>
     </Grid>
