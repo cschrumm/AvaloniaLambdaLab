@@ -19,7 +19,7 @@ public class SystemStatsController : ControllerBase
         _apiKeyValidationService = apiKeyValidationService;
         
     }
-    [HttpGet]
+    [HttpGet("system")]
     public async Task<ActionResult<SystemStats>> GetSystemStats()
     {
         if (!await ValidateApiKey())

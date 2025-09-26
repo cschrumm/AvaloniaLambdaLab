@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "V5DrAsXN4PE=",
+  "dgSpecHash": "qMQz30+ohGM=",
   "success": true,
   "projectFilePath": "/home/madmax-machine/Documents/mycode/AvaloniaLambdaLab/AvaloniaLambdaLab/AvaloniaLambdaLab.csproj",
   "expectedPackageFiles": [
@@ -25,10 +25,14 @@
     "/home/madmax-machine/.nuget/packages/harfbuzzsharp.nativeassets.macos/8.3.1.1/harfbuzzsharp.nativeassets.macos.8.3.1.1.nupkg.sha512",
     "/home/madmax-machine/.nuget/packages/harfbuzzsharp.nativeassets.webassembly/8.3.1.1/harfbuzzsharp.nativeassets.webassembly.8.3.1.1.nupkg.sha512",
     "/home/madmax-machine/.nuget/packages/harfbuzzsharp.nativeassets.win32/8.3.1.1/harfbuzzsharp.nativeassets.win32.8.3.1.1.nupkg.sha512",
+    "/home/madmax-machine/.nuget/packages/livechartscore/2.0.0-rc6.1/livechartscore.2.0.0-rc6.1.nupkg.sha512",
+    "/home/madmax-machine/.nuget/packages/livechartscore.skiasharpview/2.0.0-rc6.1/livechartscore.skiasharpview.2.0.0-rc6.1.nupkg.sha512",
+    "/home/madmax-machine/.nuget/packages/livechartscore.skiasharpview.avalonia/2.0.0-rc6.1/livechartscore.skiasharpview.avalonia.2.0.0-rc6.1.nupkg.sha512",
     "/home/madmax-machine/.nuget/packages/microcom.runtime/0.11.0/microcom.runtime.0.11.0.nupkg.sha512",
     "/home/madmax-machine/.nuget/packages/microsoft.extensions.dependencyinjection.abstractions/8.0.2/microsoft.extensions.dependencyinjection.abstractions.8.0.2.nupkg.sha512",
     "/home/madmax-machine/.nuget/packages/microsoft.extensions.logging.abstractions/8.0.3/microsoft.extensions.logging.abstractions.8.0.3.nupkg.sha512",
     "/home/madmax-machine/.nuget/packages/skiasharp/2.88.9/skiasharp.2.88.9.nupkg.sha512",
+    "/home/madmax-machine/.nuget/packages/skiasharp.harfbuzz/2.88.9/skiasharp.harfbuzz.2.88.9.nupkg.sha512",
     "/home/madmax-machine/.nuget/packages/skiasharp.nativeassets.linux/2.88.9/skiasharp.nativeassets.linux.2.88.9.nupkg.sha512",
     "/home/madmax-machine/.nuget/packages/skiasharp.nativeassets.macos/2.88.9/skiasharp.nativeassets.macos.2.88.9.nupkg.sha512",
     "/home/madmax-machine/.nuget/packages/skiasharp.nativeassets.webassembly/2.88.9/skiasharp.nativeassets.webassembly.2.88.9.nupkg.sha512",

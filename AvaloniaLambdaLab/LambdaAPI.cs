@@ -43,13 +43,13 @@ public class Instance
     public InstanceType InstanceType { get; set; }
 
     [JsonPropertyName("hostname")]
-    public string Hostname { get; set; }
+    public string Hostname { get; set; } = String.Empty;
 
     [JsonPropertyName("jupyter_token")]
-    public string JupyterToken { get; set; }
+    public string JupyterToken { get; set; } = String.Empty;
 
     [JsonPropertyName("jupyter_url")]
-    public string JupyterUrl { get; set; }
+    public string JupyterUrl { get; set; } = String.Empty;
 
     [JsonPropertyName("actions")]
     public InstanceActionAvailability Actions { get; set; }
@@ -64,22 +64,28 @@ public class Instance
 public class Region
 {
     [JsonPropertyName("name")]
-    public string Name { get; set; }
+    public string Name { get; set; } = String.Empty;
 
     [JsonPropertyName("description")]
-    public string Description { get; set; }
+    public string Description { get; set; } = String.Empty;
+    
+    // override ToString for easier display
+    public override string ToString()
+    {
+        return Name ?? "";
+    }
 }
 
 public class InstanceType
 {
     [JsonPropertyName("name")]
-    public string Name { get; set; }
+    public string Name { get; set; } = String.Empty;
 
     [JsonPropertyName("description")]
-    public string Description { get; set; }
+    public string Description { get; set; } = String.Empty;
 
     [JsonPropertyName("gpu_description")]
-    public string GpuDescription { get; set; }
+    public string GpuDescription { get; set; }  = String.Empty;
 
     [JsonPropertyName("price_cents_per_hour")]
     public int PriceCentsPerHour { get; set; }
@@ -106,10 +112,10 @@ public class InstanceTypeSpecs
 public class FilesystemMountEntry
 {
     [JsonPropertyName("mount_point")]
-    public string MountPoint { get; set; }
+    public string MountPoint { get; set; } = String.Empty;
 
     [JsonPropertyName("file_system_id")]
-    public string FileSystemId { get; set; }
+    public string FileSystemId { get; set; } = String.Empty;
 }
 
 public class InstanceActionAvailability
@@ -136,91 +142,96 @@ public class InstanceActionAvailabilityDetails
     public bool Available { get; set; }
 
     [JsonPropertyName("reason_code")]
-    public string ReasonCode { get; set; }
+    public string ReasonCode { get; set; } = String.Empty;
 
     [JsonPropertyName("reason_description")]
-    public string ReasonDescription { get; set; }
+    public string ReasonDescription { get; set; } = String.Empty;
 }
 
 public class TagEntry
 {
     [JsonPropertyName("key")]
-    public string Key { get; set; }
+    public string Key { get; set; } = String.Empty;
 
     [JsonPropertyName("value")]
-    public string Value { get; set; }
+    public string Value { get; set; } = String.Empty;
 }
 
 public class FirewallRulesetEntry
 {
     [JsonPropertyName("id")]
-    public string Id { get; set; }
+    public string Id { get; set; } = String.Empty;
 }
 
 public class SSHKey
 {
     [JsonPropertyName("id")]
-    public string Id { get; set; }
+    public string Id { get; set; } = String.Empty;
 
     [JsonPropertyName("name")]
-    public string Name { get; set; }
+    public string Name { get; set; } = String.Empty;
 
     [JsonPropertyName("public_key")]
-    public string PublicKey { get; set; }
+    public string PublicKey { get; set; } = String.Empty;
 }
 
 public class GeneratedSSHKey : SSHKey
 {
     [JsonPropertyName("private_key")]
-    public string PrivateKey { get; set; }
+    public string PrivateKey { get; set; } = String.Empty;
 }
 
 public class Filesystem
 {
     [JsonPropertyName("id")]
-    public string Id { get; set; }
+    public string Id { get; set; } = String.Empty;
 
     [JsonPropertyName("name")]
-    public string Name { get; set; }
+    public string Name { get; set; } = String.Empty;
 
     [JsonPropertyName("mount_point")]
-    public string MountPoint { get; set; }
+    public string MountPoint { get; set; } = String.Empty;
 
     [JsonPropertyName("workspace_id")]
-    public string WorkspaceId { get; set; }
+    public string WorkspaceId { get; set; } = String.Empty;
 
     [JsonPropertyName("created")]
-    public DateTime Created { get; set; }
+    public DateTime Created { get; set; } = DateTime.MinValue;
 
     [JsonPropertyName("created_by")]
-    public User CreatedBy { get; set; }
+    public User CreatedBy { get; set; } = new User();
 
     [JsonPropertyName("is_in_use")]
-    public bool IsInUse { get; set; }
+    public bool IsInUse { get; set; } = false;
 
     [JsonPropertyName("region")]
     public Region Region { get; set; }
 
-    [JsonPropertyName("bytes_used")]
-    public long? BytesUsed { get; set; }
+    [JsonPropertyName("bytes_used")] public long? BytesUsed { get; set; } = 0;
+    
+    // override ToString for easier display
+    public override string ToString()
+    {
+        return (Name ?? "") + " (" + Id + ")" + Region.Name ?? "";
+    }
 }
 
 public class User
 {
     [JsonPropertyName("id")]
-    public string Id { get; set; }
+    public string Id { get; set; } = String.Empty;
 
     [JsonPropertyName("email")]
-    public string Email { get; set; }
+    public string Email { get; set; } = String.Empty;
 
     [JsonPropertyName("status")]
-    public string Status { get; set; }
+    public string Status { get; set; } = String.Empty;
 }
 
 public class Image
 {
     [JsonPropertyName("id")]
-    public string Id { get; set; }
+    public string Id { get; set; } = String.Empty;
 
     [JsonPropertyName("created_time")]
     public DateTime CreatedTime { get; set; }
@@ -229,19 +240,19 @@ public class Image
     public DateTime UpdatedTime { get; set; }
 
     [JsonPropertyName("name")]
-    public string Name { get; set; }
+    public string Name { get; set; } = String.Empty;
 
     [JsonPropertyName("description")]
-    public string Description { get; set; }
+    public string Description { get; set; } = String.Empty;
 
     [JsonPropertyName("family")]
-    public string Family { get; set; }
+    public string Family { get; set; } = String.Empty;
 
     [JsonPropertyName("version")]
-    public string Version { get; set; }
+    public string Version { get; set; } = String.Empty;
 
     [JsonPropertyName("architecture")]
-    public string Architecture { get; set; }
+    public string Architecture { get; set; } = String.Empty;
 
     [JsonPropertyName("region")]
     public Region Region { get; set; }
@@ -250,25 +261,25 @@ public class Image
 public class FirewallRule
 {
     [JsonPropertyName("protocol")]
-    public string Protocol { get; set; }
+    public string Protocol { get; set; } = String.Empty;
 
     [JsonPropertyName("port_range")]
     public List<int> PortRange { get; set; }
 
     [JsonPropertyName("source_network")]
-    public string SourceNetwork { get; set; }
+    public string SourceNetwork { get; set; } = String.Empty;
 
     [JsonPropertyName("description")]
-    public string Description { get; set; }
+    public string Description { get; set; } = String.Empty;
 }
 
 public class FirewallRuleset
 {
     [JsonPropertyName("id")]
-    public string Id { get; set; }
+    public string Id { get; set; } = String.Empty;
 
     [JsonPropertyName("name")]
-    public string Name { get; set; }
+    public string Name { get; set; } = String.Empty;
 
     [JsonPropertyName("region")]
     public Region Region { get; set; }
@@ -287,13 +298,13 @@ public class FirewallRuleset
 public class InstanceLaunchRequest
 {
     [JsonPropertyName("region_name")]
-    public string RegionName { get; set; }
+    public string RegionName { get; set; } = String.Empty;
 
     [JsonPropertyName("instance_type_name")]
-    public string InstanceTypeName { get; set; }
+    public string InstanceTypeName { get; set; } = String.Empty;
 
     [JsonPropertyName("ssh_key_names")]
-    public List<string> SshKeyNames { get; set; }
+    public List<string> SshKeyNames { get; set; } = new();
 
     [JsonPropertyName("file_system_names")]
     public List<string> FileSystemNames { get; set; } = new();
@@ -302,16 +313,16 @@ public class InstanceLaunchRequest
     public List<RequestedFilesystemMountEntry> FileSystemMounts { get; set; }
 
     [JsonPropertyName("hostname")]
-    public string Hostname { get; set; }
+    public string Hostname { get; set; } = String.Empty;
 
     [JsonPropertyName("name")]
-    public string Name { get; set; }
+    public string Name { get; set; } = String.Empty;
 
     [JsonPropertyName("image")]
     public object Image { get; set; }
 
     [JsonPropertyName("user_data")]
-    public string UserData { get; set; }
+    public string UserData { get; set; } = String.Empty;
 
     [JsonPropertyName("tags")]
     public List<RequestedTagEntry> Tags { get; set; }
@@ -323,19 +334,19 @@ public class InstanceLaunchRequest
 public class RequestedFilesystemMountEntry
 {
     [JsonPropertyName("mount_point")]
-    public string MountPoint { get; set; }
+    public string MountPoint { get; set; } = String.Empty;
 
     [JsonPropertyName("file_system_id")]
-    public string FileSystemId { get; set; }
+    public string FileSystemId { get; set; } = String.Empty;
 }
 
 public class RequestedTagEntry
 {
     [JsonPropertyName("key")]
-    public string Key { get; set; }
+    public string Key { get; set; } = String.Empty;
 
     [JsonPropertyName("value")]
-    public string Value { get; set; }
+    public string Value { get; set; } = String.Empty;
 }
 
 public class InstanceRestartRequest
@@ -353,19 +364,19 @@ public class InstanceTerminateRequest
 public class AddSSHKeyRequest
 {
     [JsonPropertyName("name")]
-    public string Name { get; set; }
+    public string Name { get; set; } = String.Empty;
 
     [JsonPropertyName("public_key")]
-    public string PublicKey { get; set; }
+    public string PublicKey { get; set; } = String.Empty;
 }
 
 public class FilesystemCreateRequest
 {
     [JsonPropertyName("name")]
-    public string Name { get; set; }
+    public string Name { get; set; } = String.Empty;
 
     [JsonPropertyName("region")]
-    public string Region { get; set; }
+    public string Region { get; set; } = String.Empty;
 }
 
 // Response Models
@@ -384,13 +395,13 @@ public class ApiError
 public class ErrorDetails
 {
     [JsonPropertyName("code")]
-    public string Code { get; set; }
+    public string Code { get; set; } = String.Empty;
 
     [JsonPropertyName("message")]
-    public string Message { get; set; }
+    public string Message { get; set; } = String.Empty;
 
     [JsonPropertyName("suggestion")]
-    public string Suggestion { get; set; }
+    public string Suggestion { get; set; } = String.Empty;
 }
 
 public class InstanceLaunchResponse

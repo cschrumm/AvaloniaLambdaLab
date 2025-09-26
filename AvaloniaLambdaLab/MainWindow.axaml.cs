@@ -4,6 +4,7 @@ using System.ComponentModel;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
+using Avalonia.Platform.Storage;
 using Avalonia.Threading;
 namespace AvaloniaLambdaLab;
 
@@ -19,6 +20,13 @@ public class DataPoint
         private ObservableCollection<DataPoint> _graphData;
         private DispatcherTimer _timer;
         private MainGuiBackend _backend = new MainGuiBackend();
+        
+        public ObservableCollection<InstanceNameDesc> Instances { get; set; }
+        public ObservableCollection<Filesystem> Filesystems { get; set; }
+        public ObservableCollection<SSHKey> SshKeys { get; set; }
+        public InstanceNameDesc SelectedInstance { get; set; }
+        public Filesystem SelectedFilesystem { get; set; }
+        public SSHKey SelectedSshKey { get; set; }
 
         public MainWindow()
         {
@@ -64,6 +72,18 @@ public class DataPoint
                 _graphData = value;
                 OnPropertyChanged(nameof(GraphData));
             }
+        }
+
+        public async void SelectFile()
+        {
+            var topLevel = TopLevel.GetTopLevel(this);
+
+            // Start async operation to open the dialog.
+            var files = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+            {
+                Title = "Open Text File",
+                AllowMultiple = false
+            });
         }
 
         private void InitializeData()

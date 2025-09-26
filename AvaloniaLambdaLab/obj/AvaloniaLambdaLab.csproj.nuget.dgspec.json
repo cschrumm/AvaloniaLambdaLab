@@ -68,6 +68,18 @@
               "target": "Package",
               "version": "[11.3.6, )"
             },
+            "LiveChartsCore": {
+              "target": "Package",
+              "version": "[2.0.0-rc6.1, )"
+            },
+            "LiveChartsCore.SkiaSharpView": {
+              "target": "Package",
+              "version": "[2.0.0-rc6.1, )"
+            },
+            "LiveChartsCore.SkiaSharpView.Avalonia": {
+              "target": "Package",
+              "version": "[2.0.0-rc6.1, )"
+            },
             "SSH.NET": {
               "target": "Package",
               "version": "[2025.0.0, )"

@@ -1,5 +1,6 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:lvc="using:LiveChartsCore.SkiaSharpView.Avalonia"
         x:Class="AvaloniaLambdaLab.MainWindow"
         Title="Avalonia GUI Application"
         Width="800"
@@ -16,39 +17,40 @@
         <!-- Top section with dropdowns -->
         <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="20" Margin="0,0,0,20">
             <StackPanel>
-                <TextBlock Text="Option 1:" Margin="0,0,0,5"/>
+                <TextBlock Text="Machines:" Margin="0,0,0,5"/>
                 <ComboBox Name="DropDown1" 
                           Width="150" 
+                          ItemsSource="{Binding ElementName=MyWindow, Path=Instances}"
+                          SelectedItem="{Binding ElementName=MyWindow, Path=SelectedInstance}"
                           SelectionChanged="DropDown1_SelectionChanged">
-                    <ComboBoxItem Content="Choice A"/>
-                    <ComboBoxItem Content="Choice B"/>
-                    <ComboBoxItem Content="Choice C"/>
-                    <ComboBoxItem Content="Choice D"/>
                 </ComboBox>
             </StackPanel>
 
             <StackPanel>
-                <TextBlock Text="Option 2:" Margin="0,0,0,5"/>
+                <TextBlock Text="File System:" Margin="0,0,0,5"/>
                 <ComboBox Name="DropDown2" 
-                          Width="150" 
+                          Width="150"
+                          ItemsSource="{Binding ElementName=MyWindow, Path=Filesystems}"
+                          SelectedItem="{Binding ElementName=MyWindow, Path=SelectedFilesystem}"
                           SelectionChanged="DropDown2_SelectionChanged">
-                    <ComboBoxItem Content="Setting 1"/>
-                    <ComboBoxItem Content="Setting 2"/>
-                    <ComboBoxItem Content="Setting 3"/>
-                    <ComboBoxItem Content="Setting 4"/>
                 </ComboBox>
             </StackPanel>
-
             <StackPanel>
-                <TextBlock Text="Option 3:" Margin="0,0,0,5"/>
+                <TextBlock Text="SSH Keys:" Margin="0,0,0,5"/>
                 <ComboBox Name="DropDown3" 
                           Width="150" 
+                            ItemsSource="{Binding ElementName=MyWindow, Path=SshKeys}"
+                            SelectedValue="{Binding ElementName=MyWindow, Path=SelectedSshKey}"
                           SelectionChanged="DropDown3_SelectionChanged">
-                    <ComboBoxItem Content="Mode 1"/>
-                    <ComboBoxItem Content="Mode 2"/>
-                    <ComboBoxItem Content="Mode 3"/>
-                    <ComboBoxItem Content="Mode 4"/>
                 </ComboBox>
+            </StackPanel>
+            <StackPanel>
+                <TextBlock Text="Selected Local Key For Git:" Margin="0,0,0,5"/>
+                <TextBox Name="GitKey" Width="250"></TextBox>
+            </StackPanel>
+            <StackPanel>
+                <TextBlock Text="" Margin="0,0,0,5"/>
+                <Button Content="Select Key"></Button>
             </StackPanel>
         </StackPanel>
 
@@ -66,7 +68,6 @@
                     Foreground="White"
                     IsEnabled="{Binding ElementName=MyWindow, Path=IsRunning}"
                     Click="StartButton_Click"/>
-            
             <Button Name="StopButton"
                     Content="Stop"
                     Width="100"
@@ -89,7 +90,7 @@
                 </Grid.RowDefinitions>
 
                 <TextBlock Grid.Row="0" 
-                           Text="Data Visualization" 
+                           Text="System Performance Graph" 
                            FontSize="16" 
                            FontWeight="Bold" 
                            HorizontalAlignment="Center" 

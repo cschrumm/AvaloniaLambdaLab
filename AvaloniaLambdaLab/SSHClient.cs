@@ -64,6 +64,7 @@ public class SshClientManager
             {
                 using (var cmd = _sshClient.CreateCommand(command))
                 {
+                    
                     var result = cmd.Execute();
                     
                     if (!string.IsNullOrEmpty(cmd.Error))
