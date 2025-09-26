@@ -25,6 +25,7 @@
 /home/madmax-machine/.nuget/packages/bouncycastle.cryptography/2.5.1/lib/net6.0/BouncyCastle.Cryptography.dll
 /home/madmax-machine/.nuget/packages/harfbuzzsharp/8.3.1.1/lib/net8.0/HarfBuzzSharp.dll
 /home/madmax-machine/.nuget/packages/livechartscore/2.0.0-rc6.1/lib/net8.0/LiveChartsCore.dll
+/home/madmax-machine/.nuget/packages/livechartscore.skiasharpview.avalonia/2.0.0-rc6.1/lib/net8.0/LiveChartsCore.SkiaSharpView.Avalonia.dll
 /home/madmax-machine/.nuget/packages/livechartscore.skiasharpview/2.0.0-rc6.1/lib/net8.0/LiveChartsCore.SkiaSharpView.dll
 /home/madmax-machine/.nuget/packages/microcom.runtime/0.11.0/lib/net5.0/MicroCom.Runtime.dll
 /usr/lib/dotnet/packs/Microsoft.NETCore.App.Ref/9.0.5/ref/net9.0/Microsoft.CSharp.dll

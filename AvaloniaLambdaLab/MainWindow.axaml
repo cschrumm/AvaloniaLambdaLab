@@ -29,7 +29,7 @@
             <StackPanel>
                 <TextBlock Text="File System:" Margin="0,0,0,5"/>
                 <ComboBox Name="DropDown2" 
-                          Width="150"
+                          Width="120"
                           ItemsSource="{Binding ElementName=MyWindow, Path=Filesystems}"
                           SelectedItem="{Binding ElementName=MyWindow, Path=SelectedFilesystem}"
                           SelectionChanged="DropDown2_SelectionChanged">
@@ -38,7 +38,7 @@
             <StackPanel>
                 <TextBlock Text="SSH Keys:" Margin="0,0,0,5"/>
                 <ComboBox Name="DropDown3" 
-                          Width="150" 
+                          Width="120" 
                             ItemsSource="{Binding ElementName=MyWindow, Path=SshKeys}"
                             SelectedValue="{Binding ElementName=MyWindow, Path=SelectedSshKey}"
                           SelectionChanged="DropDown3_SelectionChanged">
@@ -46,7 +46,7 @@
             </StackPanel>
             <StackPanel>
                 <TextBlock Text="Selected Local Key For Git:" Margin="0,0,0,5"/>
-                <TextBox Name="GitKey" Width="250"></TextBox>
+                <TextBox Name="GitKey" Width="125"></TextBox>
             </StackPanel>
             <StackPanel>
                 <TextBlock Text="" Margin="0,0,0,5"/>
@@ -66,7 +66,7 @@
                     Height="35"
                     Background="Green"
                     Foreground="White"
-                    IsEnabled="{Binding ElementName=MyWindow, Path=IsRunning}"
+                    IsEnabled="{Binding ElementName=MyWindow, Path=IsNotRunning}"
                     Click="StartButton_Click"/>
             <Button Name="StopButton"
                     Content="Stop"
@@ -88,8 +88,16 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
-
-                <TextBlock Grid.Row="0" 
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="30*"></ColumnDefinition>
+                    <ColumnDefinition Width="70*"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="Log View" FontSize="16" 
+                           FontWeight="Bold" 
+                           HorizontalAlignment="Center" 
+                           Margin="0,0,0,10"></TextBlock>
+                <TextBlock Grid.Row="1" Grid.Column="0" Background="LightGray"></TextBlock>
+                <TextBlock Grid.Row="0"  Grid.Column="1"
                            Text="System Performance Graph" 
                            FontSize="16" 
                            FontWeight="Bold" 
@@ -97,54 +105,7 @@
                            Margin="0,0,0,10"/>
 
                 <!-- Simple graph representation using Canvas -->
-                <Canvas Grid.Row="1" 
-                        Name="GraphCanvas"
-                        Background="LightGray"
-                        MinHeight="300">
-                    
-                    <!-- Grid lines for the graph -->
-                    <Rectangle Width="1" 
-                               Height="300"
-                               Canvas.Left="50"
-                               Fill="Black"
-                               Opacity="0.3"/>
-                    
-                    <Rectangle Height="1" 
-                               Width="400"
-                               Canvas.Bottom="50"
-                               Fill="Black"
-                               Opacity="0.3"/>
-
-                    <!-- Y-axis labels -->
-                    <TextBlock Text="100" Canvas.Left="20" Canvas.Top="50"/>
-                    <TextBlock Text="75" Canvas.Left="25" Canvas.Top="100"/>
-                    <TextBlock Text="50" Canvas.Left="25" Canvas.Top="150"/>
-                    <TextBlock Text="25" Canvas.Left="25" Canvas.Top="200"/>
-                    <TextBlock Text="0" Canvas.Left="30" Canvas.Bottom="45"/>
-
-                    <!-- X-axis labels -->
-                    <TextBlock Text="0" Canvas.Left="45" Canvas.Bottom="25"/>
-                    <TextBlock Text="2" Canvas.Left="100" Canvas.Bottom="25"/>
-                    <TextBlock Text="4" Canvas.Left="150" Canvas.Bottom="25"/>
-                    <TextBlock Text="6" Canvas.Left="200" Canvas.Bottom="25"/>
-                    <TextBlock Text="8" Canvas.Left="250" Canvas.Bottom="25"/>
-
-                    <!-- Sample data points -->
-                    <Ellipse Width="8" Height="8" Fill="Blue" Canvas.Left="46" Canvas.Top="180"/>
-                    <Ellipse Width="8" Height="8" Fill="Blue" Canvas.Left="75" Canvas.Top="120"/>
-                    <Ellipse Width="8" Height="8" Fill="Blue" Canvas.Left="100" Canvas.Top="140"/>
-                    <Ellipse Width="8" Height="8" Fill="Blue" Canvas.Left="125" Canvas.Top="90"/>
-                    <Ellipse Width="8" Height="8" Fill="Blue" Canvas.Left="150" Canvas.Top="110"/>
-                    <Ellipse Width="8" Height="8" Fill="Blue" Canvas.Left="175" Canvas.Top="80"/>
-                    <Ellipse Width="8" Height="8" Fill="Blue" Canvas.Left="200" Canvas.Top="160"/>
-                    <Ellipse Width="8" Height="8" Fill="Blue" Canvas.Left="225" Canvas.Top="130"/>
-
-                    <!-- Connecting lines between points -->
-                    <Polyline Points="50,184 79,124 104,144 129,94 154,114 179,84 204,164 229,134"
-                              Stroke="Blue"
-                              StrokeThickness="2"
-                              Fill="Transparent"/>
-                </Canvas>
+                <lvc:CartesianChart Grid.Row="1" Grid.Column="1"></lvc:CartesianChart>
             </Grid>
         </Border>
     </Grid>
