@@ -17,7 +17,7 @@
           "LiveChartsCore.SkiaSharpView": "2.0.0-rc6.1",
           "LiveChartsCore.SkiaSharpView.Avalonia": "2.0.0-rc6.1",
           "SSH.NET": "2025.0.0",
-          "ServiceData": "1.0.0"
+          "Service.Library": "1.0.0"
         },
         "runtime": {
           "AvaloniaLambdaLab.dll": {}
@@ -526,12 +526,12 @@
           }
         }
       },
-      "ServiceData/1.0.0": {
+      "Service.Library/1.0.0": {
         "dependencies": {
           "SSH.NET": "2025.0.0"
         },
         "runtime": {
-          "ServiceData.dll": {
+          "Service.Library.dll": {
             "assemblyVersion": "1.0.0.0",
             "fileVersion": "1.0.0.0"
           }
@@ -797,7 +797,7 @@
       "path": "tmds.dbus.protocol/0.21.2",
       "hashPath": "tmds.dbus.protocol.0.21.2.nupkg.sha512"
     },
-    "ServiceData/1.0.0": {
+    "Service.Library/1.0.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""

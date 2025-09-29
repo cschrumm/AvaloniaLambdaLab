@@ -38,7 +38,7 @@
 /usr/lib/dotnet/packs/Microsoft.NETCore.App.Ref/9.0.5/ref/net9.0/mscorlib.dll
 /usr/lib/dotnet/packs/Microsoft.NETCore.App.Ref/9.0.5/ref/net9.0/netstandard.dll
 /home/madmax-machine/.nuget/packages/ssh.net/2025.0.0/lib/net9.0/Renci.SshNet.dll
-/home/madmax-machine/Documents/mycode/AvaloniaLambdaLab/ServiceData/obj/Debug/net9.0/ref/ServiceData.dll
+/home/madmax-machine/Documents/mycode/AvaloniaLambdaLab/Service.Library/obj/Debug/net9.0/ref/Service.Library.dll
 /home/madmax-machine/.nuget/packages/skiasharp/2.88.9/lib/net6.0/SkiaSharp.dll
 /home/madmax-machine/.nuget/packages/skiasharp.harfbuzz/2.88.9/lib/net6.0/SkiaSharp.HarfBuzz.dll
 /usr/lib/dotnet/packs/Microsoft.NETCore.App.Ref/9.0.5/ref/net9.0/System.AppContext.dll
