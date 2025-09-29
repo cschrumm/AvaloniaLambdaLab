@@ -3,6 +3,7 @@
   <component name="AvaloniaProject">
     <option name="projectPerEditor">
       <map>
+        <entry key="AvaloniaLambdaLab/App.axaml" value="AvaloniaLambdaLab/AvaloniaLambdaLab.csproj" />
         <entry key="AvaloniaLambdaLab/MainWindow.axaml" value="AvaloniaLambdaLab/AvaloniaLambdaLab.csproj" />
       </map>
     </option>

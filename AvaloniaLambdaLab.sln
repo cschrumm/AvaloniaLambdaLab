@@ -4,7 +4,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AvaloniaLambdaLab", "Avalon
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebPerfmon", "WebPerfmon\WebPerfmon.csproj", "{5B47E922-AE1A-47A7-9E18-40F6C6221767}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceData", "ServiceData\ServiceData.csproj", "{C617F2DD-03C5-4674-846B-147D9028D6FC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Service.Library", "Service.Library\Service.Library.csproj", "{C617F2DD-03C5-4674-846B-147D9028D6FC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestConsole", "TestConsole\TestConsole.csproj", "{B3CABC55-531E-4F2C-8BF4-5CAF8F14D46B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -24,5 +26,9 @@ Global
 		{C617F2DD-03C5-4674-846B-147D9028D6FC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C617F2DD-03C5-4674-846B-147D9028D6FC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C617F2DD-03C5-4674-846B-147D9028D6FC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B3CABC55-531E-4F2C-8BF4-5CAF8F14D46B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B3CABC55-531E-4F2C-8BF4-5CAF8F14D46B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B3CABC55-531E-4F2C-8BF4-5CAF8F14D46B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B3CABC55-531E-4F2C-8BF4-5CAF8F14D46B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

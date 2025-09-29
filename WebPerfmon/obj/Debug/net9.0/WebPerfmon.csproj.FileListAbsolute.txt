@@ -26,3 +26,6 @@
 /home/madmax-machine/Documents/mycode/AvaloniaLambdaLab/WebPerfmon/bin/Debug/net9.0/System.Management.dll
 /home/madmax-machine/Documents/mycode/AvaloniaLambdaLab/WebPerfmon/bin/Debug/net9.0/runtimes/win/lib/net9.0/System.Management.dll
 /home/madmax-machine/Documents/mycode/AvaloniaLambdaLab/WebPerfmon/obj/Debug/net9.0/WebPerfmon.csproj.Up2Date
+/home/madmax-machine/Documents/mycode/AvaloniaLambdaLab/WebPerfmon/bin/Debug/net9.0/ServiceData.dll
+/home/madmax-machine/Documents/mycode/AvaloniaLambdaLab/WebPerfmon/bin/Debug/net9.0/ServiceData.pdb
+/home/madmax-machine/Documents/mycode/AvaloniaLambdaLab/WebPerfmon/obj/Debug/net9.0/WebPerfmon.sourcelink.json

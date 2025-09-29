@@ -527,6 +527,9 @@
         }
       },
       "ServiceData/1.0.0": {
+        "dependencies": {
+          "SSH.NET": "2025.0.0"
+        },
         "runtime": {
           "ServiceData.dll": {
             "assemblyVersion": "1.0.0.0",

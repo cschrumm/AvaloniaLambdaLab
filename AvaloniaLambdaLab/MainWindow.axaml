@@ -15,8 +15,8 @@
         </Grid.RowDefinitions>
 
         <!-- Top section with dropdowns -->
-        <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="20" Margin="0,0,0,20">
-            <StackPanel>
+        <WrapPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,20">
+            <StackPanel Margin="0,0,5,0">
                 <TextBlock Text="Machines:" Margin="0,0,0,5"/>
                 <ComboBox Name="DropDown1" 
                           Width="150" 
@@ -26,39 +26,38 @@
                 </ComboBox>
             </StackPanel>
 
-            <StackPanel>
+            <StackPanel  Margin="0,0,5,0">
                 <TextBlock Text="File System:" Margin="0,0,0,5"/>
                 <ComboBox Name="DropDown2" 
-                          Width="120"
+                          Width="150"
                           ItemsSource="{Binding ElementName=MyWindow, Path=Filesystems}"
                           SelectedItem="{Binding ElementName=MyWindow, Path=SelectedFilesystem}"
                           SelectionChanged="DropDown2_SelectionChanged">
                 </ComboBox>
             </StackPanel>
-            <StackPanel>
+            <StackPanel Margin="0,0,5,0">
                 <TextBlock Text="SSH Keys:" Margin="0,0,0,5"/>
                 <ComboBox Name="DropDown3" 
-                          Width="120" 
+                          Width="150" 
                             ItemsSource="{Binding ElementName=MyWindow, Path=SshKeys}"
                             SelectedValue="{Binding ElementName=MyWindow, Path=SelectedSshKey}"
                           SelectionChanged="DropDown3_SelectionChanged">
                 </ComboBox>
             </StackPanel>
-            <StackPanel>
+            <StackPanel Margin="0,0,5,0">
                 <TextBlock Text="Key For Git:" Margin="0,0,0,5"/>
                 <TextBox Name="GitKey" Width="125"></TextBox>
             </StackPanel>
-            <StackPanel>
+            <StackPanel Margin="0,0,5,0">
                 <TextBlock Text="" Margin="0,0,0,5"/>
                 <Button Content="Select Key"></Button>
             </StackPanel>
-        </StackPanel>
+        </WrapPanel>
 
         <!-- Button section -->
-        <StackPanel Grid.Row="1" 
+        <WrapPanel Grid.Row="1" 
                     Orientation="Horizontal" 
-                    HorizontalAlignment="Center" 
-                    Spacing="20" 
+                    HorizontalAlignment="Center"
                     Margin="0,0,0,20">
             <Button Name="StartButton"
                     Content="Start"
@@ -76,7 +75,7 @@
                     Foreground="White"
                     IsEnabled="{Binding ElementName=MyWindow, Path=IsRunning}"
                     Click="StopButton_Click" UseLayoutRounding="True" />
-        </StackPanel>
+        </WrapPanel>
 
         <!-- Graph section -->
         <Border Grid.Row="2" 

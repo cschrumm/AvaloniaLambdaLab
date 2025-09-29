@@ -4,6 +4,8 @@ namespace WebApplication1;
 public interface IApiKeyValidationService
 {
     Task<bool> IsValidApiKeyAsync(string apiKey);
+
+    void AddKey(string key);
 }
 
 // API Key validation service implementation
@@ -34,5 +36,10 @@ public class ApiKeyValidationService : IApiKeyValidationService
         await Task.CompletedTask; // Placeholder for async operations if needed
         
         return _validApiKeys.Contains(apiKey);
+    }
+
+    public void AddKey(string key)
+    {
+        _validApiKeys.Add(key);
     }
 }

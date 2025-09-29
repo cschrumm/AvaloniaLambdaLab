@@ -1,8 +1,8 @@
 @WebApplication1_HostAddress = http://localhost:5089
 
-GET {{WebApplication1_HostAddress}}/todos/
+GET {{WebApplication1_HostAddress}}/api/SystemStats/system/
 Accept: application/json
-
+apikey: testkey
 ###
 
 GET {{WebApplication1_HostAddress}}/todos/1

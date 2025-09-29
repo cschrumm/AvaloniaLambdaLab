@@ -14,7 +14,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\ServiceData\ServiceData.csproj" />
+      <ProjectReference Include="..\Service.Library\Service.Library.csproj" />
     </ItemGroup>
 
 </Project>

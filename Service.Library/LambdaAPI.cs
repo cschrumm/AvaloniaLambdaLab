@@ -1,4 +1,4 @@
-namespace AvaloniaLambdaLab;
+namespace Service.Library;
 
 using System;
 using System.Collections.Generic;
@@ -13,34 +13,34 @@ using System.Threading.Tasks;
 public class Instance
 {
     [JsonPropertyName("id")]
-    public string Id { get; set; }
+    public string Id { get; set; } = String.Empty;
 
     [JsonPropertyName("name")]
-    public string Name { get; set; }
+    public string Name { get; set; } = String.Empty;
 
     [JsonPropertyName("ip")]
-    public string Ip { get; set; }
+    public string Ip { get; set; } = String.Empty;
 
     [JsonPropertyName("private_ip")]
-    public string PrivateIp { get; set; }
+    public string PrivateIp { get; set; } = String.Empty;
 
     [JsonPropertyName("status")]
-    public string Status { get; set; }
+    public string Status { get; set; } = String.Empty;
 
     [JsonPropertyName("ssh_key_names")]
-    public List<string> SshKeyNames { get; set; }
+    public List<string>? SshKeyNames { get; set; }
 
     [JsonPropertyName("file_system_names")]
-    public List<string> FileSystemNames { get; set; }
+    public List<string>? FileSystemNames { get; set; }
 
     [JsonPropertyName("file_system_mounts")]
-    public List<FilesystemMountEntry> FileSystemMounts { get; set; }
+    public List<FilesystemMountEntry>? FileSystemMounts { get; set; }
 
     [JsonPropertyName("region")]
-    public Region Region { get; set; }
+    public required Region Region { get; set; }
 
     [JsonPropertyName("instance_type")]
-    public InstanceType InstanceType { get; set; }
+    public required InstanceType InstanceType { get; set; }
 
     [JsonPropertyName("hostname")]
     public string Hostname { get; set; } = String.Empty;
@@ -55,10 +55,10 @@ public class Instance
     public InstanceActionAvailability Actions { get; set; }
 
     [JsonPropertyName("tags")]
-    public List<TagEntry> Tags { get; set; }
+    public List<TagEntry>? Tags { get; set; }
 
     [JsonPropertyName("firewall_rulesets")]
-    public List<FirewallRulesetEntry> FirewallRulesets { get; set; }
+    public List<FirewallRulesetEntry>? FirewallRulesets { get; set; }
 }
 
 public class Region
@@ -121,19 +121,19 @@ public class FilesystemMountEntry
 public class InstanceActionAvailability
 {
     [JsonPropertyName("migrate")]
-    public InstanceActionAvailabilityDetails Migrate { get; set; }
+    public InstanceActionAvailabilityDetails? Migrate { get; set; }
 
     [JsonPropertyName("rebuild")]
-    public InstanceActionAvailabilityDetails Rebuild { get; set; }
+    public InstanceActionAvailabilityDetails? Rebuild { get; set; }
 
     [JsonPropertyName("restart")]
-    public InstanceActionAvailabilityDetails Restart { get; set; }
+    public InstanceActionAvailabilityDetails? Restart { get; set; }
 
     [JsonPropertyName("cold_reboot")]
-    public InstanceActionAvailabilityDetails ColdReboot { get; set; }
+    public InstanceActionAvailabilityDetails? ColdReboot { get; set; }
 
     [JsonPropertyName("terminate")]
-    public InstanceActionAvailabilityDetails Terminate { get; set; }
+    public InstanceActionAvailabilityDetails? Terminate { get; set; }
 }
 
 public class InstanceActionAvailabilityDetails
@@ -319,16 +319,16 @@ public class InstanceLaunchRequest
     public string Name { get; set; } = String.Empty;
 
     [JsonPropertyName("image")]
-    public object Image { get; set; }
+    public object? Image { get; set; }
 
     [JsonPropertyName("user_data")]
     public string UserData { get; set; } = String.Empty;
 
     [JsonPropertyName("tags")]
-    public List<RequestedTagEntry> Tags { get; set; }
+    public List<RequestedTagEntry>? Tags { get; set; }
 
     [JsonPropertyName("firewall_rulesets")]
-    public List<FirewallRulesetEntry> FirewallRulesets { get; set; }
+    public List<FirewallRulesetEntry>? FirewallRulesets { get; set; }
 }
 
 public class RequestedFilesystemMountEntry
@@ -448,10 +448,22 @@ public class LambdaCloudClient : IDisposable
         _httpClient = httpClient ?? new HttpClient();
         _httpClient.BaseAddress = new Uri(BaseUrl);
         
+        
         // Set up authentication header
-        var authValue = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{apiKey}:"));
+        var authValue = Convert.ToBase64String(Encoding.ASCII.GetBytes($"{apiKey}:"));
+        _httpClient.DefaultRequestVersion = new Version(1, 0);
+        _httpClient.DefaultVersionPolicy = HttpVersionPolicy.RequestVersionOrHigher;
         _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", authValue);
-        _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+        _httpClient.DefaultRequestHeaders.Accept.Clear();
+        // application/json
+        _httpClient.DefaultRequestHeaders.AcceptCharset.Add(new StringWithQualityHeaderValue("utf-8"));
+        _httpClient.DefaultRequestHeaders.AcceptCharset.Add(new StringWithQualityHeaderValue("ISO-8859-1"));
+        //_httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+        _httpClient.DefaultRequestHeaders.TryAddWithoutValidation("Content-Type", "application/json");
+        _httpClient.DefaultRequestHeaders.TryAddWithoutValidation("accept", "application/json");
+        
+        //_httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("*/*"));
+        
 
         _jsonOptions = new JsonSerializerOptions
         {
@@ -588,7 +600,11 @@ public class LambdaCloudClient : IDisposable
     // Helper Methods
     private async Task<T> GetAsync<T>(string endpoint)
     {
-        var response = await _httpClient.GetAsync(endpoint);
+        // Glaude Foo
+        var response = await _httpClient.GetAsync(BaseUrl + endpoint);
+
+        var rq = response.RequestMessage;
+       
         return await HandleResponseAsync<T>(response);
     }
 
@@ -596,7 +612,8 @@ public class LambdaCloudClient : IDisposable
     {
         var json = JsonSerializer.Serialize(data, _jsonOptions);
         var content = new StringContent(json, Encoding.UTF8, "application/json");
-        var response = await _httpClient.PostAsync(endpoint, content);
+        // Claude Foo
+        var response = await _httpClient.PostAsync(BaseUrl + endpoint, content);
         return await HandleResponseAsync<T>(response);
     }
 
@@ -604,7 +621,8 @@ public class LambdaCloudClient : IDisposable
     {
         var json = JsonSerializer.Serialize(data, _jsonOptions);
         var content = new StringContent(json, Encoding.UTF8, "application/json");
-        var response = await _httpClient.PutAsync(endpoint, content);
+        // Claude Foo
+        var response = await _httpClient.PutAsync(BaseUrl + endpoint, content);
         return await HandleResponseAsync<T>(response);
     }
 
@@ -612,7 +630,8 @@ public class LambdaCloudClient : IDisposable
     {
         var json = JsonSerializer.Serialize(data, _jsonOptions);
         var content = new StringContent(json, Encoding.UTF8, "application/json");
-        var request = new HttpRequestMessage(HttpMethod.Patch, endpoint) { Content = content };
+        // Claude Foo
+        var request = new HttpRequestMessage(HttpMethod.Patch, BaseUrl + endpoint) { Content = content };
         var response = await _httpClient.SendAsync(request);
         return await HandleResponseAsync<T>(response);
     }
@@ -626,11 +645,11 @@ public class LambdaCloudClient : IDisposable
     private async Task<T> HandleResponseAsync<T>(HttpResponseMessage response)
     {
         var content = await response.Content.ReadAsStringAsync();
-
+        
         if (response.IsSuccessStatusCode)
         {
             if (typeof(T) == typeof(object) && string.IsNullOrEmpty(content))
-                return default(T);
+                return default(T)!;
 
             var apiResponse = JsonSerializer.Deserialize<ApiResponse<T>>(content, _jsonOptions);
             return apiResponse.Data;
@@ -666,8 +685,8 @@ public class LambdaCloudClient : IDisposable
 public class InstanceTypesItem
 {
     [JsonPropertyName("instance_type")]
-    public InstanceType InstanceType { get; set; }
+    public required InstanceType InstanceType { get; set; }
 
     [JsonPropertyName("regions_with_capacity_available")]
-    public List<Region> RegionsWithCapacityAvailable { get; set; }
+    public List<Region>? RegionsWithCapacityAvailable { get; set; }
 }

@@ -4,7 +4,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Renci.SshNet;
 using Renci.SshNet.Common;
-namespace AvaloniaLambdaLab;
+namespace Service.Library;
 
 public class SshClientManager
     {

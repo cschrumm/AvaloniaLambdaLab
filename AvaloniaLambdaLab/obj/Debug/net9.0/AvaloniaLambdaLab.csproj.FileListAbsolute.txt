@@ -81,3 +81,4 @@
 /home/madmax-machine/Documents/mycode/AvaloniaLambdaLab/AvaloniaLambdaLab/bin/Debug/net9.0/LiveChartsCore.SkiaSharpView.dll
 /home/madmax-machine/Documents/mycode/AvaloniaLambdaLab/AvaloniaLambdaLab/bin/Debug/net9.0/SkiaSharp.HarfBuzz.dll
 /home/madmax-machine/Documents/mycode/AvaloniaLambdaLab/AvaloniaLambdaLab/bin/Debug/net9.0/LiveChartsCore.SkiaSharpView.Avalonia.dll
+/home/madmax-machine/Documents/mycode/AvaloniaLambdaLab/AvaloniaLambdaLab/obj/Debug/net9.0/AvaloniaLambdaLab.sourcelink.json

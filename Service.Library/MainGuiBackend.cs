@@ -5,9 +5,9 @@ using System.Data;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
-using ServiceData;
+using Service.Library;
 
-namespace AvaloniaLambdaLab;
+namespace Service.Library;
 
 
 public class InstanceNameDesc

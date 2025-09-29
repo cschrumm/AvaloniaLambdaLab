@@ -1,4 +1,14 @@
-﻿namespace ServiceData;
+﻿using System.Text.Json.Serialization;
+
+namespace Service.Library;
+
+
+[JsonSerializable(typeof(SystemStats))]
+[JsonSerializable(typeof(CpuStats))]
+[JsonSerializable(typeof(MemoryStats))]
+internal partial class AppJsonSerializerContext : JsonSerializerContext
+{
+}
 
 
 public class SystemStats
@@ -9,12 +19,14 @@ public class SystemStats
     public List<GpuStats> GpuStats { get; set; } = new();
 }
 
+
 public class CpuStats
 {
     public double UsagePercentage { get; set; }
     public int CoreCount { get; set; }
     public string ProcessorName { get; set; } = string.Empty;
 }
+
 
 public class MemoryStats
 {
@@ -25,6 +37,7 @@ public class MemoryStats
     public double ProcessWorkingSetMB { get; set; }
 }
 
+[JsonSerializable(typeof(GpuStats))]
 public class GpuStats
 {
     public int Index { get; set; }

@@ -1,4 +1,4 @@
-using ServiceData;
+using Service.Library;
 
 namespace WebApplication1;
 using Microsoft.AspNetCore.Mvc;
@@ -12,19 +12,17 @@ using System.IO;
 [Route("api/[controller]")]
 public class SystemStatsController : ControllerBase
 {
-    private readonly IApiKeyValidationService _apiKeyValidationService;
+ 
 
-    public SystemStatsController(IApiKeyValidationService apiKeyValidationService)
+    public SystemStatsController()
     {
-        _apiKeyValidationService = apiKeyValidationService;
+       
+        
         
     }
     [HttpGet("system")]
     public async Task<ActionResult<SystemStats>> GetSystemStats()
     {
-        if (!await ValidateApiKey())
-            return Unauthorized(new { error = "Invalid or missing API key" });
-
         try
         {
             var stats = new SystemStats
@@ -46,9 +44,7 @@ public class SystemStatsController : ControllerBase
     [HttpGet("cpu")]
     public async Task<ActionResult<CpuStats>> GetCpuStats()
     {
-        if (!await ValidateApiKey())
-            return Unauthorized(new { error = "Invalid or missing API key" });
-
+        
         try
         {
             var cpuStats = await GetCpuUsageAsync();
@@ -63,9 +59,7 @@ public class SystemStatsController : ControllerBase
     [HttpGet("memory")]
     public async Task<ActionResult<MemoryStats>> GetMemoryStats()
     {
-        if (!await ValidateApiKey())
-            return Unauthorized(new { error = "Invalid or missing API key" });
-
+     
         try
         {
             var memoryStats = GetMemoryUsage();
@@ -80,9 +74,7 @@ public class SystemStatsController : ControllerBase
     [HttpGet("gpu")]
     public async Task<ActionResult<List<GpuStats>>> GetGpuStats()
     {
-        if (!await ValidateApiKey())
-            return Unauthorized(new { error = "Invalid or missing API key" });
-
+     
         try
         {
             var gpuStats = await GetGpuStatsAsync();
@@ -93,16 +85,7 @@ public class SystemStatsController : ControllerBase
             return StatusCode(500, new { error = ex.Message });
         }
     }
-
-    private async Task<bool> ValidateApiKey()
-    {
-        var apiKey = Request.Headers["X-API-Key"].FirstOrDefault();
-        
-        if (string.IsNullOrEmpty(apiKey))
-            return false;
-
-        return await _apiKeyValidationService.IsValidApiKeyAsync(apiKey);
-    }
+ 
 
     private async Task<CpuStats> GetCpuUsageAsync()
     {

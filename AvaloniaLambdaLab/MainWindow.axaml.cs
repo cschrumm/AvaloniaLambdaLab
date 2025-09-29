@@ -6,6 +6,8 @@ using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using Avalonia.Platform.Storage;
 using Avalonia.Threading;
+using Service.Library;
+
 namespace AvaloniaLambdaLab;
 
 public class DataPoint

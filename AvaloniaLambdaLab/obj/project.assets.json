@@ -714,14 +714,17 @@
           "lib/net8.0/Tmds.DBus.Protocol.dll": {}
         }
       },
-      "ServiceData/1.0.0": {
+      "Service.Library/1.0.0": {
         "type": "project",
         "framework": ".NETCoreApp,Version=v9.0",
+        "dependencies": {
+          "SSH.NET": "2025.0.0"
+        },
         "compile": {
-          "bin/placeholder/ServiceData.dll": {}
+          "bin/placeholder/Service.Library.dll": {}
         },
         "runtime": {
-          "bin/placeholder/ServiceData.dll": {}
+          "bin/placeholder/Service.Library.dll": {}
         }
       }
     }
@@ -1804,10 +1807,10 @@
         "tmds.dbus.protocol.nuspec"
       ]
     },
-    "ServiceData/1.0.0": {
+    "Service.Library/1.0.0": {
       "type": "project",
-      "path": "../ServiceData/ServiceData.csproj",
-      "msbuildProject": "../ServiceData/ServiceData.csproj"
+      "path": "../Service.Library/Service.Library.csproj",
+      "msbuildProject": "../Service.Library/Service.Library.csproj"
     }
   },
   "projectFileDependencyGroups": {
@@ -1821,7 +1824,7 @@
       "LiveChartsCore.SkiaSharpView >= 2.0.0-rc6.1",
       "LiveChartsCore.SkiaSharpView.Avalonia >= 2.0.0-rc6.1",
       "SSH.NET >= 2025.0.0",
-      "ServiceData >= 1.0.0"
+      "Service.Library >= 1.0.0"
     ]
   },
   "packageFolders": {
@@ -1849,8 +1852,8 @@
         "net9.0": {
           "targetAlias": "net9.0",
           "projectReferences": {
-            "/home/madmax-machine/Documents/mycode/AvaloniaLambdaLab/ServiceData/ServiceData.csproj": {
-              "projectPath": "/home/madmax-machine/Documents/mycode/AvaloniaLambdaLab/ServiceData/ServiceData.csproj"
+            "/home/madmax-machine/Documents/mycode/AvaloniaLambdaLab/Service.Library/Service.Library.csproj": {
+              "projectPath": "/home/madmax-machine/Documents/mycode/AvaloniaLambdaLab/Service.Library/Service.Library.csproj"
             }
           }
         }
