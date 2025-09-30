@@ -25,7 +25,6 @@
                           SelectionChanged="DropDown1_SelectionChanged">
                 </ComboBox>
             </StackPanel>
-
             <StackPanel  Margin="0,0,5,0">
                 <TextBlock Text="File System:" Margin="0,0,0,5"/>
                 <ComboBox Name="DropDown2" 
@@ -41,6 +40,15 @@
                           Width="150" 
                             ItemsSource="{Binding ElementName=MyWindow, Path=SshKeys}"
                             SelectedValue="{Binding ElementName=MyWindow, Path=SelectedSshKey}"
+                          SelectionChanged="DropDown3_SelectionChanged">
+                </ComboBox>
+            </StackPanel>
+            <StackPanel Margin="0,0,5,0">
+                <TextBlock Text="List Images:" Margin="0,0,0,5"/>
+                <ComboBox Name="ListImages" 
+                          Width="150" 
+                          ItemsSource="{Binding ElementName=MyWindow, Path=SshKeys}"
+                          SelectedValue="{Binding ElementName=MyWindow, Path=SelectedSshKey}"
                           SelectionChanged="DropDown3_SelectionChanged">
                 </ComboBox>
             </StackPanel>

@@ -17,6 +17,7 @@ public class SshClientManager
             try
             {
                 _sshClient = new SshClient(host, port, username, password);
+                
                 _sshClient.Connect();
                 
                 Console.WriteLine($"Connected to {host}:{port} as {username}");

@@ -307,22 +307,21 @@ public class InstanceLaunchRequest
     public List<string> SshKeyNames { get; set; } = new();
 
     [JsonPropertyName("file_system_names")]
-    public List<string> FileSystemNames { get; set; } = new();
+    public List<string> FileSystemNames { get; set; } = null!;
 
     [JsonPropertyName("file_system_mounts")]
-    public List<RequestedFilesystemMountEntry> FileSystemMounts { get; set; }
+    public List<RequestedFilesystemMountEntry>? FileSystemMounts { get; set; }
 
     [JsonPropertyName("hostname")]
-    public string Hostname { get; set; } = String.Empty;
+    public string Hostname { get; set; } = null!;
 
     [JsonPropertyName("name")]
     public string Name { get; set; } = String.Empty;
 
-    [JsonPropertyName("image")]
-    public object? Image { get; set; }
+    [JsonPropertyName("image")] public object? Image { get; set; } = null!;
 
     [JsonPropertyName("user_data")]
-    public string UserData { get; set; } = String.Empty;
+    public string? UserData { get; set; }
 
     [JsonPropertyName("tags")]
     public List<RequestedTagEntry>? Tags { get; set; }

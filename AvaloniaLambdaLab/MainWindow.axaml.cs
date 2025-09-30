@@ -7,6 +7,7 @@ using Avalonia.Markup.Xaml;
 using Avalonia.Platform.Storage;
 using Avalonia.Threading;
 using Service.Library;
+using Image = Avalonia.Controls.Image;
 
 namespace AvaloniaLambdaLab;
 
@@ -26,9 +27,13 @@ public class DataPoint
         public ObservableCollection<InstanceNameDesc> Instances { get; set; }
         public ObservableCollection<Filesystem> Filesystems { get; set; }
         public ObservableCollection<SSHKey> SshKeys { get; set; }
+        
+        public ObservableCollection<Image> InstanceTypes { get; set; }
         public InstanceNameDesc SelectedInstance { get; set; }
         public Filesystem SelectedFilesystem { get; set; }
         public SSHKey SelectedSshKey { get; set; }
+        
+        public Image SelectedImage { get; set; }
 
         public MainWindow()
         {

@@ -15,7 +15,9 @@ Console.WriteLine("Hello, World!");
 var pp = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
 
 
+var lmbdaKey = System.Environment.GetEnvironmentVariable("LAMBDA_KEY");
 
+var cclient = new LambdaCloudClient(lmbdaKey ?? "");
 
 /*
  *
@@ -25,15 +27,46 @@ var pp = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
  */
 
 System.Threading.Thread.Sleep(1000);
+var mncl = new MainGuiBackend();
 
-var lmbdaKey = System.Environment.GetEnvironmentVariable("LAMBDA_KEY");
+mncl.SshLogMessage += (msg) => 
+{
+    Console.WriteLine($"SSH Log: {msg}");
+};
+/*
 
-var cclient = new LambdaCloudClient(lmbdaKey ?? "");
+var inst = await mncl.InStanceTypes();
+var kys = await mncl.ListSshKeys();
+var fss = await mncl.ListFileSystems();
+
+var ky = kys.Where(k=> k.Name == "madmax-machine-2").FirstOrDefault();
+
+var to_st = inst.Where(k=> k.Name.IndexOf("gh200") > 0).FirstOrDefault();
+
+var ids = await mncl.CreateServer("Test-Instance-1", to_st?.Name, to_st?.Region?.Name, ky.Name,null);
+
+*/
+var inst = await mncl.InStanceTypes();
+var kys = await mncl.ListSshKeys();
+var fss = await mncl.ListFileSystems();
+var imgs = await mncl.ListImages();
+
+
+//var instances = await mncl.ListInstances();
+
+//var kypath = "/home/madmax-machine/.ssh/madmax-machine-2.pem";
+//mncl.SShSetup(instances[0], kypath);
+
+
+//Console.WriteLine("Instance Types:");
+/*
+
+
 
 
 var ssh = new SshClientManager();
    
-var kypath = "/home/madmax-machine/.ssh/madmax-machine-2.pem";
+
    
 var exists = System.IO.File.Exists(kypath);
    
@@ -41,6 +74,7 @@ var dr = System.IO.Directory.Exists("/home/madmax-machine/.ssh");
    
 ssh.ConnectWithPrivateKey("192.222.59.234", 22, "ubuntu", kypath);
 var rslt = ssh.ExecuteCommand("ls -la");
+*/
 
 
 
