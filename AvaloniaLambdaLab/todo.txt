@@ -1,1 +1,11 @@
 Add scott plot library
+
+1. Work on GUI to display
+   - List all the server available
+   - List all the ssh keys available
+   - List all the file systems available
+   - Select the pem key file to use to login to the server
+
+2. Make the code to connect to the server and install the required packages
+
+3. Plot the data to use for the remote server monitoring

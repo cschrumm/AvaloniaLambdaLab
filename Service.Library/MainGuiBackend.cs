@@ -91,9 +91,9 @@ public class MainGuiBackend
        
     }
     // delete the server
-    public async Task DeleteServer(string instanceType, string fileSystemId, string sshKeyId)
+    public async Task DeleteServer(string instanceId)
     {
-        
+        var rslt = await _cloudClient.TerminateInstancesAsync(new InstanceTerminateRequest(){ InstanceIds = new List<string>() { instanceId } });
     }
     
     private void SetupRemoteServer()
