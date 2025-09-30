@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("AvaloniaLambdaLab")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1e77bd6d0c7f28d560974d7afa2046f3d645f103")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+ba16c8752adf183865353dd97e03240a2f694664")]
 [assembly: System.Reflection.AssemblyProductAttribute("AvaloniaLambdaLab")]
 [assembly: System.Reflection.AssemblyTitleAttribute("AvaloniaLambdaLab")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

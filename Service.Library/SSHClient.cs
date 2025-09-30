@@ -39,6 +39,8 @@ public class SshClientManager
                     : new PrivateKeyFile(privateKeyPath, passphrase);
 
                 var keyFiles = new[] { keyFile };
+                
+                
                 _sshClient = new SshClient(host, port, username, keyFiles);
                 _sshClient.Connect();
                 

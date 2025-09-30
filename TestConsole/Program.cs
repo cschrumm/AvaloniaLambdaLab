@@ -12,6 +12,8 @@ using Service.Library;
 
 Console.WriteLine("Hello, World!");
 
+var pp = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+
 
 
 
@@ -22,12 +24,39 @@ Console.WriteLine("Hello, World!");
  * 3. Figure out ssh to connect and then run git commands.
  */
 
-System.Threading.Thread.Sleep(5000);
+System.Threading.Thread.Sleep(1000);
 
 var lmbdaKey = System.Environment.GetEnvironmentVariable("LAMBDA_KEY");
 
 var cclient = new LambdaCloudClient(lmbdaKey ?? "");
 
+
+var ssh = new SshClientManager();
+   
+var kypath = "/home/madmax-machine/.ssh/madmax-machine-2.pem";
+   
+var exists = System.IO.File.Exists(kypath);
+   
+var dr = System.IO.Directory.Exists("/home/madmax-machine/.ssh");
+   
+ssh.ConnectWithPrivateKey("192.222.59.234", 22, "ubuntu", kypath);
+var rslt = ssh.ExecuteCommand("ls -la");
+
+
+
+/*
+ 
+ var ssh = new SshClientManager();
+   
+   var kypath = "/home/madmax-machine/.ssh/madmax-machine-2.pem";
+   
+   var exists = System.IO.File.Exists(kypath);
+   
+   var dr = System.IO.Directory.Exists("/home/madmax-machine/.ssh");
+   
+   ssh.ConnectWithPrivateKey("192.222.59.234", 22, "ubuntu@192.222.59.234", kypath);
+   var rslt = ssh.ExecuteCommand("ls -la");
+   
 var instances = await cclient.ListInstanceTypesAsync();
 
 foreach (var item in instances)
@@ -35,6 +64,7 @@ foreach (var item in instances)
     Console.WriteLine($"Instance Type: {item.Key}");
     Console.WriteLine($"Instance Type: {item.Value}");
 }
+*/
 
 /*
  *data '{
@@ -72,7 +102,7 @@ foreach (var item in instances)
    }'
  * IHatMailP@ssw0rds$%
  */
-
+/*
 var prv_key = "/home/madmax-machine/.ssh/id_rsa_lambda";
 
 var instance = new InstanceLaunchRequest();
@@ -88,3 +118,11 @@ Console.WriteLine($"Launched Instance: {nm.InstanceIds[0]}");
 
 
 
+*/
+
+var instnc = await cclient.ListInstancesAsync();
+
+foreach (var item in instnc)
+{
+  Console.WriteLine($"Instance: {item.Name} ID: {item.Id} State: {item.Status}");
+}
