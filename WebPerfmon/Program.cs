@@ -32,6 +32,8 @@ builder.Services.AddRateLimiter(options =>
     });
 });
 
+// locate token key
+
 
 
 
@@ -42,6 +44,24 @@ var app = builder.Build();
 app.UseMiddleware<HeaderCheckMiddleware>();
 app.MapControllers();
 app.UseRateLimiter();
+
+bool lkey = false;
+foreach (var arg in args)
+{
+    
+    if (lkey)
+    {
+        var svr = app.Services.GetService<IApiKeyValidationService>();
+        svr.AddKey(arg);
+        lkey = false;
+    }
+    
+    if (arg == "--token")
+    {
+        lkey = true;
+    }
+}
+
 
 // determine if there is a debugger attached
 if (System.Diagnostics.Debugger.IsAttached)

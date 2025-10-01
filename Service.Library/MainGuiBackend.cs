@@ -99,6 +99,15 @@ public class MainGuiBackend
         return rslt;
     }
     
+    public List<Image> CompantibleImages(InstanceNameDesc instance, List<Image> images)
+    {
+        var ins = images.Where(i => i.Region.Name == instance.Region.Name).ToList();
+        
+        ins.Sort((x, y) => x.Version.CompareTo(y.Version));
+        
+        return ins;
+    }
+    
     public async Task<List<Image>> ListImages()
     {
         var rslt = await _cloudClient.ListImagesAsync();
@@ -106,7 +115,9 @@ public class MainGuiBackend
         return rslt;
     }
     // create a server
-    public async Task<List<string>> CreateServer(string InstName,string instanceType, string Region,string sshKeyId, string? fileSystemId)
+    public async Task<List<string>> CreateServer(string InstName,string instanceType, string Region,string sshKeyId,
+        string image_id,
+        string? fileSystemId)
     {
         
         /*
@@ -161,6 +172,7 @@ public class MainGuiBackend
         instance.RegionName = Region;
         instance.InstanceTypeName = instanceType;
         instance.SshKeyNames = new List<string>() { sshKeyId };
+        instance.Image = new ImageId(){ Id = image_id };
         instance.FileSystemNames = (fileSystemId is null) ? null : new List<string>(){ fileSystemId};
         instance.Name = InstName;
 
@@ -177,7 +189,7 @@ public class MainGuiBackend
         var rslt = await _cloudClient.TerminateInstancesAsync(new InstanceTerminateRequest(){ InstanceIds = new List<string>() { instanceId } });
     }
     
-    public void SShSetup(Instance instance, string kypath)
+    public void SShSetup(Instance instance, string kypath, string token)
     {
         var sshManager = new SshClientManager();
 
@@ -191,28 +203,38 @@ public class MainGuiBackend
         // Disconnect when done
         //sshManager.Disconnect();
 
-        this.SetupRemoteServer(sshManager);
+        this.SetupRemoteServer(sshManager, token);
 
     }
     
-    private void SetupRemoteServer(SshClientManager manager)
+    private void SetupRemoteServer(SshClientManager manager, string token)
     {
+        /*
+         *  Sets up and runs the remote server....
+         */
         var cmds = new List<string>
         {
-            "sudo apt update",
-            "sudo apt install git -y",
-            "wget https://packages.microsoft.com/config/ubuntu/24.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb",
-            "sudo dpkg -i packages-microsoft-prod.deb",
-            "rm packages-microsoft-prod.deb",
-            "sudo apt update",
-            "sudo apt install dotnet-sdk-9.0 -y",
-            "sudo ufw allow 7777",
+            "sudo apt update",  /* update package lists */
+            "sudo apt install git -y", /* install git */
+            "sudo add-apt-repository ppa:dotnet/backports", /* add dotnet repo */
+            "sudo apt update", /* update package lists again */
+            "sudo apt-get install -y dotnet-sdk-9.0", /* install dotnet sdk */
+            "sudo apt-get install -y aspnetcore-runtime-9.0", /* install dotnet runtime */
+            "git clone https://github.com/cschrumm/AvaloniaLambdaLab.git", /* clone your repo */
+            "cd ./AvaloniaLambdaLab/WePerfmon", /* change to your project directory */
+            "dotnet publish -c Release -o ./publish", /* publish the project */
+            "cd publish",
+            "sudo ufw allow 7777", /* open the port in the firewall */
+            $"./WebPerfmon --url http://127.0.0.1:7777 --token {token} > app.log 2>&1 &", /* run the app in the background */
         };
         
         foreach (var cmd in cmds)
         {
+            // get current datetime
+            var inpt = $"{System.DateTime.Now} - Executing: {cmd}";
+            OnLogMessage?.Invoke(inpt);
             var rslt = manager.ExecuteCommand(cmd);
-            System.Threading.Thread.Sleep(1);
+            System.Threading.Thread.Sleep(10);
             OnLogMessage?.Invoke(rslt);
         }
 

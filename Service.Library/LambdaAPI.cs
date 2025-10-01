@@ -294,6 +294,11 @@ public class FirewallRuleset
     public List<string> InstanceIds { get; set; }
 }
 
+public class ImageId
+{
+    public string Id { get; set; }
+}
+
 // Request Models
 public class InstanceLaunchRequest
 {
@@ -318,7 +323,7 @@ public class InstanceLaunchRequest
     [JsonPropertyName("name")]
     public string Name { get; set; } = String.Empty;
 
-    [JsonPropertyName("image")] public object? Image { get; set; } = null!;
+    [JsonPropertyName("image")] public ImageId Image { get; set; } = null!;
 
     [JsonPropertyName("user_data")]
     public string? UserData { get; set; }
