@@ -220,12 +220,15 @@ public class MainGuiBackend
             "sudo apt update", /* update package lists again */
             "sudo apt-get install -y dotnet-sdk-9.0", /* install dotnet sdk */
             "sudo apt-get install -y aspnetcore-runtime-9.0", /* install dotnet runtime */
+            "dotnet dev-certs https --trust" /* trust the dev certs */,
+            "rm -r AvaloniaLambdaLab", /* remove any existing repo */
+            "rm -r publish", /* remove any existing publish directory */
             "git clone https://github.com/cschrumm/AvaloniaLambdaLab.git", /* clone your repo */
-            "cd ./AvaloniaLambdaLab/WePerfmon", /* change to your project directory */
-            "dotnet publish -c Release -o ./publish", /* publish the project */
-            "cd publish",
+            "cd ./AvaloniaLambdaLab/WebPerfmon", /* change to your project directory */
+            "pwd", /* print working directory for verification */
+            "dotnet build ./AvaloniaLambdaLab/WebPerfmon/WebPerfmon.csproj -c Release -o ./publish", /* publish the project */
             "sudo ufw allow 7777", /* open the port in the firewall */
-            $"./WebPerfmon --url http://127.0.0.1:7777 --token {token} > app.log 2>&1 &", /* run the app in the background */
+            $"./publish/WebPerfmon --token {token} > app.log 2>&1 &", /* run the app in the background */
         };
         
         foreach (var cmd in cmds)

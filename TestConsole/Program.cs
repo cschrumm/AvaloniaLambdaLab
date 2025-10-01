@@ -62,13 +62,20 @@ var ids = await mncl.CreateServer("Test-Instance-1", to_st?.Name, to_st?.Region?
    
    Console.WriteLine("good");
 
+var instances = await mncl.ListInstances();
+   
+   var kypath = "/home/madmax-machine/.ssh/madmax-machine-2.pem";
+   mncl.SShSetup(instances[0], kypath, (new Guid()).ToString());
+   
 */
 
-
 var instances = await mncl.ListInstances();
-
+   
 var kypath = "/home/madmax-machine/.ssh/madmax-machine-2.pem";
 mncl.SShSetup(instances[0], kypath, (new Guid()).ToString());
+
+   
+Console.WriteLine("good");
 
 
 //Console.WriteLine("Instance Types:");

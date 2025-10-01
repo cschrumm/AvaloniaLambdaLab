@@ -35,7 +35,7 @@ builder.Services.AddRateLimiter(options =>
 // locate token key
 
 
-
+builder.WebHost.UseUrls("http://127.0.0.1:7777");
 
 
 
@@ -51,6 +51,7 @@ foreach (var arg in args)
     
     if (lkey)
     {
+        Console.WriteLine($"Adding API Key: {arg}");
         var svr = app.Services.GetService<IApiKeyValidationService>();
         svr.AddKey(arg);
         lkey = false;
