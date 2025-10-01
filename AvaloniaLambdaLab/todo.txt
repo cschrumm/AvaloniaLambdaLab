@@ -1,11 +1,18 @@
-Add scott plot library
 
-1. Work on GUI to display
-   - List all the server available
-   - List all the ssh keys available
-   - List all the file systems available
-   - Select the pem key file to use to login to the server
+1. So complete the code to get the server up and running.
 
-2. Make the code to connect to the server and install the required packages
+2. Hook the GUI up to the backend.
 
-3. Plot the data to use for the remote server monitoring
+3. Add Code to plot the graph of memory, gpu and cpu usage over time.
+   1.  Call the backend every 3 seonds to get the latest data.
+   2.  Plat with matplotlib
+      - Add access point for each element.
+      - Plot for only past 10 minutes
+      
+4. Work on logic to stop server should it be unused for more then 30 minutes. 
+    Add last utilized time based on GPU usage of 30% or more
+    After 30 minutes of no usage above 30% GPU usage, stop the server
+    
+    
+Estimated time: 1 - 1 hour, 2 - 1 hour, 3 - 2 hours, 4 - 1 hour
+Total: 5 hours

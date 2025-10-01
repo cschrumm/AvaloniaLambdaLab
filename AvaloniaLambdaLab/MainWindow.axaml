@@ -47,8 +47,8 @@
                 <TextBlock Text="List Images:" Margin="0,0,0,5"/>
                 <ComboBox Name="ListImages" 
                           Width="150" 
-                          ItemsSource="{Binding ElementName=MyWindow, Path=SshKeys}"
-                          SelectedValue="{Binding ElementName=MyWindow, Path=SelectedSshKey}"
+                          ItemsSource="{Binding ElementName=MyWindow, Path=Images}"
+                          SelectedValue="{Binding ElementName=MyWindow, Path=SelectedImage}"
                           SelectionChanged="DropDown3_SelectionChanged">
                 </ComboBox>
             </StackPanel>
@@ -76,6 +76,14 @@
                     IsEnabled="{Binding ElementName=MyWindow, Path=IsNotRunning}"
                     Click="StartButton_Click" UseLayoutRounding="True"/>
             <Button Name="StopButton"
+                    Content="Stop"
+                    Width="100"
+                    Height="35"
+                    Background="Red"
+                    Foreground="White"
+                    IsEnabled="{Binding ElementName=MyWindow, Path=IsRunning}"
+                    Click="StopButton_Click" UseLayoutRounding="True" />
+            <Button Name="OpenButton"
                     Content="Stop"
                     Width="100"
                     Height="35"

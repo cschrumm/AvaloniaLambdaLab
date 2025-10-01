@@ -39,17 +39,46 @@ var inst = await mncl.InStanceTypes();
 var kys = await mncl.ListSshKeys();
 var fss = await mncl.ListFileSystems();
 
-var ky = kys.Where(k=> k.Name == "madmax-machine-2").FirstOrDefault();
 
 var to_st = inst.Where(k=> k.Name.IndexOf("gh200") > 0).FirstOrDefault();
 
 var ids = await mncl.CreateServer("Test-Instance-1", to_st?.Name, to_st?.Region?.Name, ky.Name,null);
 
+  var inst = await mncl.InStanceTypes();
+   var kys = await mncl.ListSshKeys();
+   var fss = await mncl.ListFileSystems();
+   var imgs = await mncl.ListImages();
+   
+   var to_st = inst.Where(k=> k.Name.IndexOf("gh200") > 0).FirstOrDefault();
+   
+   var ky = kys.Where(k => k.Name.IndexOf("max") > 0).FirstOrDefault();
+   
+   var cmp = mncl.CompantibleImages(to_st, imgs);
+   
+   var lst_im = cmp[^1];
+   
+   var ids = await mncl.CreateServer("Test-Instance-1", to_st?.Name, to_st?.Region?.Name, ky.Name,lst_im.Id,null);
+   
+   
+   Console.WriteLine("good");
+
+var instances = await mncl.ListInstances();
+   
+   var kypath = "/home/madmax-machine/.ssh/madmax-machine-2.pem";
+   mncl.SShSetup(instances[0], kypath, (new Guid()).ToString());
+   
 */
-var inst = await mncl.InStanceTypes();
-var kys = await mncl.ListSshKeys();
-var fss = await mncl.ListFileSystems();
-var imgs = await mncl.ListImages();
+
+var instances = await mncl.ListInstances();
+   
+var kypath = "/home/madmax-machine/.ssh/madmax-machine-2.pem";
+mncl.SShSetup(instances[0], kypath, (new Guid()).ToString());
+
+   
+Console.WriteLine("good");
+
+
+//Console.WriteLine("Instance Types:");
 
 
 //var instances = await mncl.ListInstances();

@@ -32,8 +32,10 @@ builder.Services.AddRateLimiter(options =>
     });
 });
 
+// locate token key
 
 
+builder.WebHost.UseUrls("http://127.0.0.1:7777");
 
 
 
@@ -42,6 +44,25 @@ var app = builder.Build();
 app.UseMiddleware<HeaderCheckMiddleware>();
 app.MapControllers();
 app.UseRateLimiter();
+
+bool lkey = false;
+foreach (var arg in args)
+{
+    
+    if (lkey)
+    {
+        Console.WriteLine($"Adding API Key: {arg}");
+        var svr = app.Services.GetService<IApiKeyValidationService>();
+        svr.AddKey(arg);
+        lkey = false;
+    }
+    
+    if (arg == "--token")
+    {
+        lkey = true;
+    }
+}
+
 
 // determine if there is a debugger attached
 if (System.Diagnostics.Debugger.IsAttached)

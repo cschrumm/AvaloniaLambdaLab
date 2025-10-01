@@ -28,7 +28,7 @@ public class DataPoint
         public ObservableCollection<Filesystem> Filesystems { get; set; }
         public ObservableCollection<SSHKey> SshKeys { get; set; }
         
-        public ObservableCollection<Image> InstanceTypes { get; set; }
+        public ObservableCollection<Image> Images { get; set; }
         public InstanceNameDesc SelectedInstance { get; set; }
         public Filesystem SelectedFilesystem { get; set; }
         public SSHKey SelectedSshKey { get; set; }
