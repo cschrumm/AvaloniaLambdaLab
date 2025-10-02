@@ -6,6 +6,7 @@ namespace Service.Library;
 [JsonSerializable(typeof(SystemStats))]
 [JsonSerializable(typeof(CpuStats))]
 [JsonSerializable(typeof(MemoryStats))]
+[JsonSerializable(typeof(GpuStats))]
 internal partial class AppJsonSerializerContext : JsonSerializerContext
 {
 }
@@ -37,7 +38,6 @@ public class MemoryStats
     public double ProcessWorkingSetMB { get; set; }
 }
 
-[JsonSerializable(typeof(GpuStats))]
 public class GpuStats
 {
     public int Index { get; set; }

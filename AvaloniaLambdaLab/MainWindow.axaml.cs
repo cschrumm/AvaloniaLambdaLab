@@ -1,6 +1,8 @@
 using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Linq;
+using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
@@ -23,25 +25,105 @@ public class DataPoint
         private ObservableCollection<DataPoint> _graphData;
         private DispatcherTimer _timer;
         private MainGuiBackend _backend = new MainGuiBackend();
+
+        public ObservableCollection<InstanceNameDesc> Instances { get; set; } = new();
+        public ObservableCollection<Filesystem> Filesystems { get; set; } = new();
+        public ObservableCollection<SSHKey> SshKeys { get; set; } = new();
         
-        public ObservableCollection<InstanceNameDesc> Instances { get; set; }
-        public ObservableCollection<Filesystem> Filesystems { get; set; }
-        public ObservableCollection<SSHKey> SshKeys { get; set; }
-        
-        public ObservableCollection<Image> Images { get; set; }
+        public ObservableCollection<Service.Library.Image> Images { get; set; } = new();
         public InstanceNameDesc SelectedInstance { get; set; }
         public Filesystem SelectedFilesystem { get; set; }
         public SSHKey SelectedSshKey { get; set; }
         
-        public Image SelectedImage { get; set; }
+        public Service.Library.Image SelectedImage { get; set; }
+        
+        /* Log information to screen */
+        public string LogViewMessage { get; set; } = "";
 
         public MainWindow()
         {
+            /*
+             *  
+             */
             InitializeComponent();
             DataContext = this;
             InitializeData();
             _timer = new DispatcherTimer();
-            _timer.Interval = TimeSpan.FromSeconds(3); 
+            _timer.Interval = TimeSpan.FromSeconds(3);
+            _backend.OnLogMessage += MonitorLog;
+            _backend.OnInstanceLaunched += LaunchNotice;
+            LoadData();
+            _backend.Startup();
+        }
+        
+        public void LaunchNotice(string msg)
+        {
+            IsRunning = _backend.IsRunning;
+            LogViewMessage += msg + "\n";
+            this.CallChangeOnGui(nameof(IsRunning));
+        }
+        
+        
+        
+        public void MonitorLog(string msg)
+        {
+            LogViewMessage += msg + "\n";
+            this.CallChangeOnGui(nameof(LogViewMessage));
+        }
+        
+        private void ClearLog()
+        {
+            LogViewMessage = "";
+            this.CallChangeOnGui(nameof(LogViewMessage));
+        }
+
+        private void CallChangeOnGui(string nm)
+        {
+            Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(async () =>
+            {
+                OnPropertyChanged(nm);
+            });
+        }
+
+        private void LoadData()
+        {
+            Task.Run(async () =>
+            {
+                var intypes = _backend.InStanceTypes();
+                var filesys = _backend.ListFileSystems();
+                var keys = _backend.ListSshKeys();
+                var images = _backend.ListImages();
+                await Task.WhenAll(intypes, filesys, keys, images);
+                
+                Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(async () =>
+                {
+                    // UI operations here, e.g.,
+                    //myTextBlock.Text = "Updated from background thread.";
+                    foreach (var x in intypes.Result)
+                    {
+                        Instances.Add(x);
+                    }
+                    foreach (var x in filesys.Result)
+                    {
+                        Filesystems.Add(x);
+                    }
+                    
+                    foreach (var x in keys.Result)
+                    {
+                        SshKeys.Add(x);
+                    }
+                    foreach (var x in images.Result)
+                    {
+                        Images.Add(x);
+                    }
+                    
+                    OnPropertyChanged(nameof(Instances));
+                    OnPropertyChanged(nameof(Filesystems));
+                    OnPropertyChanged(nameof(Images));
+                });
+                
+
+            });
         }
         
         private void Timer_Tick(object sender, EventArgs e)
@@ -119,6 +201,12 @@ public class DataPoint
             IsRunning = false;
             _timer.Stop();
             // Add logic for what happens when stopping
+        }
+        
+        private void LaunchButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Logic to launch an instance using selected parameters
+            _backend.LaunchBrowser();
         }
 
         private void DropDown1_SelectionChanged(object sender, SelectionChangedEventArgs e)

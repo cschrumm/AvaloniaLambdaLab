@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data;
+using System.Diagnostics;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
@@ -17,7 +18,7 @@ public class InstanceNameDesc
     public Region Region { get; set; }
     public override string ToString()
     {
-        return $"{Name} - {Region.Name}";
+        return $"{Name} - {Region.Name} -  ${IntType.InstanceType.PriceCentsPerHour/100.0}/hr";
     }
 }
 public class MainGuiBackend
@@ -25,8 +26,15 @@ public class MainGuiBackend
     private readonly LambdaCloudClient _cloudClient;
     private readonly HttpClient _httpClient;
     private string _launched_url = "";
+    private string _api_url = "";
+
+    private string _guid_token = "6157fe8c-8081-4615-ad79-445af35223fd";
     
-    public Action<string> OnLogMessage;
+    public event Action<string> OnLogMessage;
+    
+    public event Action <string> OnInstanceLaunched;
+    
+    public bool IsRunning { get; private set; }
     public MainGuiBackend()
     {
         var apiKey = System.Environment.GetEnvironmentVariable("LAMBDA_KEY"); // Load from secure storage or environment variable
@@ -34,19 +42,59 @@ public class MainGuiBackend
         _cloudClient = new LambdaCloudClient(apiKey,_httpClient);
         
     }
-    
+    /*
     public event Action<string> SshLogMessage
     {
         add { OnLogMessage += value; }
         remove { OnLogMessage -= value; }
     }
     
-    
+    public event Action<string> InstanceLaunched
+    {
+        add { OnInstanceLaunched += value; }
+        remove { OnInstanceLaunched -= value; }
+    }
+    */
+
+    public void Startup()
+    {
+        Task.Run(async () =>
+        {
+            var insts = await _cloudClient.ListInstancesAsync();
+
+            if (insts == null || !insts.Any())
+            {
+                InitalizeInstance(insts[0]);
+            }
+        });
+
+    }
+
+    private async Task InitalizeInstance(Instance instance)
+    {
+        if (instance is null) throw new ArgumentNullException(nameof(instance));
+        
+        
+        while(instance.Status.ToLower()!="running")
+        {
+            Task.Delay(5000).Wait();
+            instance = (await _cloudClient.ListInstancesAsync()).Find(i => i.Id == instance.Id);
+            OnLogMessage?.Invoke($"Instance Status: {instance.Status}");
+        }
+        
+        OnLogMessage?.Invoke($"Instance is running at IP: {instance.Ip}");
+        
+        _launched_url = instance.JupyterUrl;
+        
+        _api_url = $"https://{instance.Ip}:7777/api/system";
+
+        IsRunning = true;
+        OnInstanceLaunched?.Invoke("Instance Launched");
+    }
     
     public async Task<SystemStats?> RetrieveSystemStats()
     {
-        string url = $"{_launched_url}/api/systemstats/system";
-        var rslt = await _httpClient.GetFromJsonAsync<SystemStats>(url);
+        var rslt = await _httpClient.GetFromJsonAsync<SystemStats>(_api_url);
         return rslt;
     }
     
@@ -187,6 +235,13 @@ public class MainGuiBackend
     public async Task DeleteServer(string instanceId)
     {
         var rslt = await _cloudClient.TerminateInstancesAsync(new InstanceTerminateRequest(){ InstanceIds = new List<string>() { instanceId } });
+
+        _api_url = String.Empty;
+        _launched_url = String.Empty;
+        
+        IsRunning = false;
+        
+        OnInstanceLaunched?.Invoke($"Instance Terminated");
     }
     
     public void SShSetup(Instance instance, string kypath, string token)
@@ -205,6 +260,27 @@ public class MainGuiBackend
 
         this.SetupRemoteServer(sshManager, token);
 
+    }
+    
+    public void LaunchBrowser()
+    {
+        try
+        {
+            // command to launch the default browser
+            // google-chrome "http://localhost:7777
+            // For .NET Core Process.Start on URLs
+            var psi = new ProcessStartInfo
+            {
+                FileName = "google-chrome",
+                Arguments = _launched_url,
+                UseShellExecute = false
+            };
+            Process.Start(psi);
+        }
+        catch (Exception ex)
+        {
+            OnLogMessage?.Invoke($"Failed to launch browser: {ex.Message}");
+        }
     }
     
     private void SetupRemoteServer(SshClientManager manager, string token)

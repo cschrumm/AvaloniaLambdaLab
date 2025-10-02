@@ -29,7 +29,7 @@ var cclient = new LambdaCloudClient(lmbdaKey ?? "");
 System.Threading.Thread.Sleep(1000);
 var mncl = new MainGuiBackend();
 
-mncl.SshLogMessage += (msg) => 
+mncl.OnLogMessage += (msg) => 
 {
     Console.WriteLine($"SSH Log: {msg}");
 };
@@ -72,9 +72,20 @@ var instances = await mncl.ListInstances();
 var instances = await mncl.ListInstances();
    
 var kypath = "/home/madmax-machine/.ssh/madmax-machine-2.pem";
+
+var gd = Guid.NewGuid().ToString();
+mncl.SShSetup(instances[0], kypath, gd);
+
+
+/*
+
+
+var instances = await mncl.ListInstances();
+   
+var kypath = "/home/madmax-machine/.ssh/madmax-machine-2.pem";
 mncl.SShSetup(instances[0], kypath, (new Guid()).ToString());
 
-   
+*/ 
 Console.WriteLine("good");
 
 

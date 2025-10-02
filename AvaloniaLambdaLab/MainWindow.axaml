@@ -19,7 +19,7 @@
             <StackPanel Margin="0,0,5,0">
                 <TextBlock Text="Machines:" Margin="0,0,0,5"/>
                 <ComboBox Name="DropDown1" 
-                          Width="150" 
+                          Width="300" 
                           ItemsSource="{Binding ElementName=MyWindow, Path=Instances}"
                           SelectedItem="{Binding ElementName=MyWindow, Path=SelectedInstance}"
                           SelectionChanged="DropDown1_SelectionChanged">
@@ -28,7 +28,7 @@
             <StackPanel  Margin="0,0,5,0">
                 <TextBlock Text="File System:" Margin="0,0,0,5"/>
                 <ComboBox Name="DropDown2" 
-                          Width="150"
+                          Width="300"
                           ItemsSource="{Binding ElementName=MyWindow, Path=Filesystems}"
                           SelectedItem="{Binding ElementName=MyWindow, Path=SelectedFilesystem}"
                           SelectionChanged="DropDown2_SelectionChanged">
@@ -37,7 +37,7 @@
             <StackPanel Margin="0,0,5,0">
                 <TextBlock Text="SSH Keys:" Margin="0,0,0,5"/>
                 <ComboBox Name="DropDown3" 
-                          Width="150" 
+                          Width="300" 
                             ItemsSource="{Binding ElementName=MyWindow, Path=SshKeys}"
                             SelectedValue="{Binding ElementName=MyWindow, Path=SelectedSshKey}"
                           SelectionChanged="DropDown3_SelectionChanged">
@@ -46,15 +46,15 @@
             <StackPanel Margin="0,0,5,0">
                 <TextBlock Text="List Images:" Margin="0,0,0,5"/>
                 <ComboBox Name="ListImages" 
-                          Width="150" 
+                          Width="300" 
                           ItemsSource="{Binding ElementName=MyWindow, Path=Images}"
                           SelectedValue="{Binding ElementName=MyWindow, Path=SelectedImage}"
                           SelectionChanged="DropDown3_SelectionChanged">
                 </ComboBox>
             </StackPanel>
             <StackPanel Margin="0,0,5,0">
-                <TextBlock Text="Key For Git:" Margin="0,0,0,5"/>
-                <TextBox Name="GitKey" Width="125"></TextBox>
+                <TextBlock Text="Key For Lambda Lab:" Margin="0,0,0,5"/>
+                <TextBox Name="GitKey" Width="300"></TextBox>
             </StackPanel>
             <StackPanel Margin="0,0,5,0">
                 <TextBlock Text="" Margin="0,0,0,5"/>
@@ -74,7 +74,9 @@
                     Background="Green"
                     Foreground="White"
                     IsEnabled="{Binding ElementName=MyWindow, Path=IsNotRunning}"
-                    Click="StartButton_Click" UseLayoutRounding="True"/>
+                    Click="StartButton_Click" UseLayoutRounding="True"
+                    Margin="0,0,10,0"
+                    />
             <Button Name="StopButton"
                     Content="Stop"
                     Width="100"
@@ -82,15 +84,19 @@
                     Background="Red"
                     Foreground="White"
                     IsEnabled="{Binding ElementName=MyWindow, Path=IsRunning}"
-                    Click="StopButton_Click" UseLayoutRounding="True" />
+                    Click="StopButton_Click" UseLayoutRounding="True"
+                    Margin="0,0,10,0"
+                    />
             <Button Name="OpenButton"
-                    Content="Stop"
+                    Content="Launch Ide"
                     Width="100"
                     Height="35"
                     Background="Red"
                     Foreground="White"
                     IsEnabled="{Binding ElementName=MyWindow, Path=IsRunning}"
-                    Click="StopButton_Click" UseLayoutRounding="True" />
+                    Click="LaunchButton_Click" UseLayoutRounding="True" 
+                    Margin="0,0,10,0"
+                    />
         </WrapPanel>
 
         <!-- Graph section -->
@@ -108,10 +114,14 @@
                     <ColumnDefinition Width="70*"></ColumnDefinition>
                 </Grid.ColumnDefinitions>
                 <TextBlock Grid.Row="0" Grid.Column="0" Text="Log View" FontSize="16" 
+                           Name="LogView"
                            FontWeight="Bold" 
-                           HorizontalAlignment="Center" 
+                           HorizontalAlignment="Center"
                            Margin="0,0,0,10"></TextBlock>
-                <TextBlock Grid.Row="1" Grid.Column="0" Background="LightGray" Margin="1,1,1,1"></TextBlock>
+                <TextBlock Grid.Row="1" Grid.Column="0" Background="LightGray"
+                           Text="{Binding ElementName=MyWindow, Path=LogViewMessage}"
+                           Margin="1,1,1,1">
+                </TextBlock>
                 <TextBlock Grid.Row="0"  Grid.Column="1"
                            Text="System Performance Graph" 
                            FontSize="16" 
