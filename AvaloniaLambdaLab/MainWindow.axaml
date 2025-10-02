@@ -22,7 +22,7 @@
                           Width="300" 
                           ItemsSource="{Binding ElementName=MyWindow, Path=Instances}"
                           SelectedItem="{Binding ElementName=MyWindow, Path=SelectedInstance}"
-                          SelectionChanged="DropDown1_SelectionChanged">
+                          SelectionChanged="Machines_SelectionChanged">
                 </ComboBox>
             </StackPanel>
             <StackPanel  Margin="0,0,5,0">
@@ -31,7 +31,7 @@
                           Width="300"
                           ItemsSource="{Binding ElementName=MyWindow, Path=Filesystems}"
                           SelectedItem="{Binding ElementName=MyWindow, Path=SelectedFilesystem}"
-                          SelectionChanged="DropDown2_SelectionChanged">
+                          SelectionChanged="FileSystem_SelectionChanged">
                 </ComboBox>
             </StackPanel>
             <StackPanel Margin="0,0,5,0">
@@ -40,7 +40,7 @@
                           Width="300" 
                             ItemsSource="{Binding ElementName=MyWindow, Path=SshKeys}"
                             SelectedValue="{Binding ElementName=MyWindow, Path=SelectedSshKey}"
-                          SelectionChanged="DropDown3_SelectionChanged">
+                          SelectionChanged="SshKey_SelectionChanged">
                 </ComboBox>
             </StackPanel>
             <StackPanel Margin="0,0,5,0">
@@ -49,7 +49,7 @@
                           Width="300" 
                           ItemsSource="{Binding ElementName=MyWindow, Path=Images}"
                           SelectedValue="{Binding ElementName=MyWindow, Path=SelectedImage}"
-                          SelectionChanged="DropDown3_SelectionChanged">
+                          SelectionChanged="ListImages_SelectionChanged">
                 </ComboBox>
             </StackPanel>
             <StackPanel Margin="0,0,5,0">
@@ -58,7 +58,8 @@
             </StackPanel>
             <StackPanel Margin="0,0,5,0">
                 <TextBlock Text="" Margin="0,0,0,5"/>
-                <Button Content="Select Key"></Button>
+                <Button Content="Select Key"
+                        Click="SelectKey_Click"></Button>
             </StackPanel>
         </WrapPanel>
 

@@ -209,7 +209,7 @@ public class DataPoint
             _backend.LaunchBrowser();
         }
 
-        private void DropDown1_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void Machines_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             // Handle dropdown 1 selection change
             if (sender is ComboBox combo && combo.SelectedItem != null)
@@ -220,7 +220,7 @@ public class DataPoint
             }
         }
 
-        private void DropDown2_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void FileSystem_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             // Handle dropdown 2 selection change
             if (sender is ComboBox combo && combo.SelectedItem != null)
@@ -230,8 +230,56 @@ public class DataPoint
                 // Add your logic here
             }
         }
+        
+        private async Task<string> PickFile()
+        {
+            var topLevel = TopLevel.GetTopLevel(this);
+            string path = "";
+            // Start async operation to open the dialog.
+            var filesTask = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+            {
+                Title = "Open Text File",
+                AllowMultiple = false
+            });
+           
+            var files = filesTask.ToList();
+            if (files.Count > 0)
+            {
+                var file = files[0];
+                path = file.Path.LocalPath;
+            }
 
-        private void DropDown3_SelectionChanged(object sender, SelectionChangedEventArgs e)
+            return path;
+        }
+        
+        private async void SelectKey_Click(object sender, RoutedEventArgs e)
+        {
+            // Logic to launch an instance using selected parameters
+
+            var path = await PickFile();
+            if (!string.IsNullOrEmpty(path))
+            {
+               Console.WriteLine("Selected Path: " + path);
+            }
+        }
+        
+        private async void OnUnload_Window(object? sender, RoutedEventArgs e)
+        {
+             _backend.Shutdown();
+        }
+
+        private void SshKey_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            // Handle dropdown 3 selection change
+            if (sender is ComboBox combo && combo.SelectedItem != null)
+            {
+                // Process selection
+                var selectedItem = combo.SelectedItem.ToString();
+                // Add your logic here
+            }
+        }
+        
+        private void ListImages_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             // Handle dropdown 3 selection change
             if (sender is ComboBox combo && combo.SelectedItem != null)
@@ -242,6 +290,7 @@ public class DataPoint
             }
         }
 
+       
         public event PropertyChangedEventHandler PropertyChanged;
 
         protected virtual void OnPropertyChanged(string propertyName)

@@ -21,17 +21,32 @@ public class InstanceNameDesc
         return $"{Name} - {Region.Name} -  ${IntType.InstanceType.PriceCentsPerHour/100.0}/hr";
     }
 }
+
+public class DataForApp
+{
+    public string SelectedInstanceName { get; set; } = String.Empty;
+    public string SelectedInstanceRegion { get; set; } = String.Empty;
+    public string SelectedSshKey { get; set; } = String.Empty;
+    public string SelectedImageId { get; set; } = String.Empty;
+    public string PathToPrivateKey { get; set; } = String.Empty;
+    public string? SelectedFileSystemId { get; set; } = null;
+    public string GuidToken { get; set; } = String.Empty;
+    
+}
+
+
 public class MainGuiBackend
 {
+    // talks to the lambda cloud and manages the instance
     private readonly LambdaCloudClient _cloudClient;
+    // used to talk to the instance api
     private readonly HttpClient _httpClient;
+    // launched url for jupyter lab
     private string _launched_url = "";
     private string _api_url = "";
-
-    private string _guid_token = "6157fe8c-8081-4615-ad79-445af35223fd";
-    
+    private string _app_data_path = System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "/AvaloniaLambdaLab";
+    private DataForApp _dataForApp;
     public event Action<string> OnLogMessage;
-    
     public event Action <string> OnInstanceLaunched;
     
     public bool IsRunning { get; private set; }
@@ -40,21 +55,52 @@ public class MainGuiBackend
         var apiKey = System.Environment.GetEnvironmentVariable("LAMBDA_KEY"); // Load from secure storage or environment variable
         _httpClient = new HttpClient();
         _cloudClient = new LambdaCloudClient(apiKey,_httpClient);
+
+        if (!Directory.Exists(_app_data_path))
+        {
+            try
+            {
+                Directory.CreateDirectory(_app_data_path);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+               // throw;
+            }
+        }
+        
+        this.LoadAppData();
         
     }
-    /*
-    public event Action<string> SshLogMessage
+
+    public void LoadAppData()
     {
-        add { OnLogMessage += value; }
-        remove { OnLogMessage -= value; }
+        // Load any saved application data from a file app.json
+        var app_file = $"{_app_data_path}/app.json";
+        if (File.Exists(app_file))
+        {
+            var json = File.ReadAllText(app_file);
+            _dataForApp = System.Text.Json.JsonSerializer.Deserialize<DataForApp>(json) ?? new DataForApp();
+            
+        }
+        else
+        {
+            _dataForApp = new DataForApp();
+        }
+        
+        if(_dataForApp.GuidToken is null || _dataForApp.GuidToken == String.Empty)
+            _dataForApp.GuidToken = Guid.NewGuid().ToString();
+        
     }
     
-    public event Action<string> InstanceLaunched
+    public void SaveAppData()
     {
-        add { OnInstanceLaunched += value; }
-        remove { OnInstanceLaunched -= value; }
+        // Save application data to a file app.json
+        var app_file = $"{_app_data_path}/app.json";
+        var json = System.Text.Json.JsonSerializer.Serialize(_dataForApp);
+        File.WriteAllText(app_file, json);
     }
-    */
+    
 
     public void Startup()
     {
@@ -125,25 +171,20 @@ public class MainGuiBackend
     {
         
         var rslt = await _cloudClient.ListFilesystemsAsync();
-        
         return rslt;
-
 
     }
     
     public async Task<List<Instance>> ListInstances()
     {
         var rslt = await _cloudClient.ListInstancesAsync();
-        
         return rslt;
         
     }
     // get a list of ssh keys
     public async Task<List<SSHKey>> ListSshKeys()
     {
-        
         var rslt = await _cloudClient.ListSSHKeysAsync();
-        
         return rslt;
     }
     
@@ -167,46 +208,6 @@ public class MainGuiBackend
         string image_id,
         string? fileSystemId)
     {
-        
-        /*
-         *
-         * curl --request POST --url 'https://cloud.lambda.ai/api/v1/instance-operations/launch' \
-                --header 'accept: application/json' \
-                --user '<YOUR-API-KEY>:' \
-                --data '{
-             "region_name": "europe-central-1",
-             "instance_type_name": "gpu_8x_a100",
-             "ssh_key_names": [
-               "my-public-key"
-             ],
-             "file_system_names": [
-               "my-filesystem"
-             ],
-             "file_system_mounts": [
-               {
-                 "mount_point": "/data/custom-mount-point",
-                 "file_system_id": "398578a2336b49079e74043f0bd2cfe8"
-               }
-             ],
-             "hostname": "headnode1",
-             "name": "My Instance",
-             "image": {
-               "id": "string"
-             },
-             "user_data": "string",
-             "tags": [
-               {
-                 "key": "key1",
-                 "value": "value1"
-               }
-             ],
-             "firewall_rulesets": [
-               {
-                 "id": "c4d291f47f9d436fa39f58493ce3b50d"
-               }
-             ]
-           }'
-         */
         
         /*
          *  Required:
@@ -249,14 +250,7 @@ public class MainGuiBackend
         var sshManager = new SshClientManager();
 
         sshManager.ConnectWithPrivateKey(instance.Ip, 22, "ubuntu", kypath);
-        // Example file upload
-        // sshManager.UploadFile("localfile.txt", "/root/remotefile.txt");
-
-        // Example file download
-        // sshManager.DownloadFile("/root/remotefile.txt", "localfile.txt");
-
-        // Disconnect when done
-        //sshManager.Disconnect();
+        
 
         this.SetupRemoteServer(sshManager, token);
 
@@ -317,36 +311,11 @@ public class MainGuiBackend
             OnLogMessage?.Invoke(rslt);
         }
 
-        /*
-         *
-         * sudo apt update
-           sudo apt install git -y
-           git config --global user.name "Your Name"
-           git config --global user.email "your.email@example.com"
-           git clone git@github.com:username/repository-name.git
-           cd repository-name
+    }
 
-           wget https://packages.microsoft.com/config/ubuntu/22.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
-           sudo dpkg -i packages-microsoft-prod.deb
-           rm packages-microsoft-prod.deb
-           sudo apt update
-           sudo apt install dotnet-sdk-9.0 -y
-           dotnet restore
-           dotnet build
-           uname -m # check architecture x86_64 or aarch64
-           dotnet publish -c Release -r linux-x64 --self-contained -o ./publish
-           or
-           dotnet publish -c Release -r linux-arm64 --self-contained -o ./publish
-           cd publish
-
-           sudo ufw allow 5000
-           sudo ufw allow 5001
-           run the app in the background
-           nohup dotnet YourAppName --url http://localhost:7777 > app.log 2>&1 &
-         */
-
-
-
+    public async void Shutdown()
+    {
+        this.SaveAppData();
     }
     
     
