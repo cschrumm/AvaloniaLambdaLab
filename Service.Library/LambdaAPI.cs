@@ -51,8 +51,7 @@ public class Instance
     [JsonPropertyName("jupyter_url")]
     public string JupyterUrl { get; set; } = String.Empty;
 
-    [JsonPropertyName("actions")]
-    public InstanceActionAvailability Actions { get; set; }
+    [JsonPropertyName("actions")] public InstanceActionAvailability Actions { get; set; } = null!;
 
     [JsonPropertyName("tags")]
     public List<TagEntry>? Tags { get; set; }
@@ -173,6 +172,11 @@ public class SSHKey
 
     [JsonPropertyName("public_key")]
     public string PublicKey { get; set; } = String.Empty;
+
+    public override string ToString()
+    {
+        return Name ?? "";
+    }
 }
 
 public class GeneratedSSHKey : SSHKey
@@ -204,8 +208,7 @@ public class Filesystem
     [JsonPropertyName("is_in_use")]
     public bool IsInUse { get; set; } = false;
 
-    [JsonPropertyName("region")]
-    public Region Region { get; set; }
+    [JsonPropertyName("region")] public Region Region { get; set; } = null!;
 
     [JsonPropertyName("bytes_used")] public long? BytesUsed { get; set; } = 0;
     
@@ -254,8 +257,12 @@ public class Image
     [JsonPropertyName("architecture")]
     public string Architecture { get; set; } = String.Empty;
 
-    [JsonPropertyName("region")]
-    public Region Region { get; set; }
+    [JsonPropertyName("region")] public Region Region { get; set; } = new();
+    
+    public override string ToString()
+    {
+        return (Name ?? "" + (Description ?? "") + " " + (Family ?? "") + " " + (Version ?? "") + " " + (Architecture ?? ""));
+    }
 }
 
 public class FirewallRule
@@ -264,7 +271,7 @@ public class FirewallRule
     public string Protocol { get; set; } = String.Empty;
 
     [JsonPropertyName("port_range")]
-    public List<int> PortRange { get; set; }
+    public List<int>? PortRange { get; set; }
 
     [JsonPropertyName("source_network")]
     public string SourceNetwork { get; set; } = String.Empty;
@@ -296,7 +303,7 @@ public class FirewallRuleset
 
 public class ImageId
 {
-    public string Id { get; set; }
+    public string Id { get; set; } = String.Empty;
 }
 
 // Request Models
@@ -356,13 +363,13 @@ public class RequestedTagEntry
 public class InstanceRestartRequest
 {
     [JsonPropertyName("instance_ids")]
-    public List<string> InstanceIds { get; set; }
+    public List<string>? InstanceIds { get; set; }
 }
 
 public class InstanceTerminateRequest
 {
     [JsonPropertyName("instance_ids")]
-    public List<string> InstanceIds { get; set; }
+    public List<string>? InstanceIds { get; set; }
 }
 
 public class AddSSHKeyRequest

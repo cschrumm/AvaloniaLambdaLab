@@ -8,8 +8,8 @@ namespace Service.Library;
 
 public class SshClientManager
     {
-        private SshClient _sshClient;
-        private SftpClient _sftpClient;
+        private SshClient _sshClient = null!;
+        private SftpClient _sftpClient = null!;
 
         // Basic SSH connection with password authentication
         public bool ConnectWithPassword(string host, int port, string username, string password)
@@ -81,7 +81,7 @@ public class SshClientManager
             catch (Exception ex)
             {
                 Console.WriteLine($"Command execution failed: {ex.Message}");
-                return null;
+                return String.Empty;
             }
         }
 
@@ -117,7 +117,7 @@ public class SshClientManager
             catch (Exception ex)
             {
                 Console.WriteLine($"Command execution failed: {ex.Message}");
-                return null;
+                return String.Empty;
             }
         }
 
@@ -226,7 +226,7 @@ public class SshClientManager
         }
 
         // Port forwarding example (local port forwarding)
-        public ForwardedPortLocal CreatePortForward(uint localPort, string remoteHost, uint remotePort)
+        public ForwardedPortLocal? CreatePortForward(uint localPort, string remoteHost, uint remotePort)
         {
             if (_sshClient == null || !_sshClient.IsConnected)
             {
