@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
 using System.Net.Http;
 using System.Net.Http.Json;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Service.Library;
 
@@ -25,17 +27,17 @@ public class InstanceNameDesc
 public class DataForApp
 {
     public string SelectedInstanceName { get; set; } = String.Empty;
-    public string SelectedInstanceRegion { get; set; } = String.Empty;
+    
     public string SelectedSshKey { get; set; } = String.Empty;
     public string SelectedImageId { get; set; } = String.Empty;
     public string PathToPrivateKey { get; set; } = String.Empty;
-    public string? SelectedFileSystemId { get; set; } = null;
+    public string SelectedFileSystemId { get; set; } = String.Empty;
     public string GuidToken { get; set; } = String.Empty;
     
 }
 
 
-public class MainGuiBackend
+public class MainGuiBackend : INotifyPropertyChanged
 {
     // talks to the lambda cloud and manages the instance
     private readonly LambdaCloudClient _cloudClient;
@@ -48,6 +50,21 @@ public class MainGuiBackend
     private DataForApp _dataForApp;
     public event Action<string> OnLogMessage;
     public event Action <string> OnInstanceLaunched;
+    
+    public event PropertyChangedEventHandler? PropertyChanged;
+    // bound to the front end.
+    public ObservableCollection<InstanceNameDesc> Instances { get; set; } = new();
+    public ObservableCollection<Filesystem> Filesystems { get; set; } = new();
+    public ObservableCollection<SSHKey> SshKeys { get; set; } = new();
+    public ObservableCollection<Service.Library.Image> Images { get; set; } = new();
+    public InstanceNameDesc SelectedInstance { get; set; }
+    public Filesystem SelectedFilesystem { get; set; }
+    public SSHKey SelectedSshKey { get; set; }
+    public Service.Library.Image SelectedImage { get; set; }
+        
+    public ObservableCollection<Instance> RunningInstances { get; set; } = new();
+    
+    public string PathToKey { get; set; } = "";
     
     public bool IsRunning { get; private set; }
     public MainGuiBackend()
@@ -69,7 +86,7 @@ public class MainGuiBackend
             }
         }
         
-        this.LoadAppData();
+        //this.LoadAppData();
         
     }
 
@@ -91,12 +108,53 @@ public class MainGuiBackend
         if(_dataForApp.GuidToken is null || _dataForApp.GuidToken == String.Empty)
             _dataForApp.GuidToken = Guid.NewGuid().ToString();
         
+        
+        PathToKey = _dataForApp.PathToPrivateKey ?? String.Empty;
+
+        if (!_dataForApp.SelectedFileSystemId.IsNullOrEmpty())
+        {
+           SelectedFilesystem = Filesystems.FirstOrDefault(f => f.Name == _dataForApp.SelectedFileSystemId);
+        }
+
+        if (!_dataForApp.SelectedInstanceName.IsNullOrEmpty())
+        {
+            SelectedInstance = Instances.Where(i => i.Name == _dataForApp.SelectedInstanceName).FirstOrDefault();
+        }
+        
+        if (!_dataForApp.SelectedSshKey.IsNullOrEmpty())
+        {
+            SelectedSshKey = SshKeys.Where(s => s.Name == _dataForApp.SelectedSshKey).FirstOrDefault();
+        }
+        
+        if (!_dataForApp.SelectedImageId.IsNullOrEmpty())
+        {
+            SelectedImage = Images.Where(i => i.Id == _dataForApp.SelectedImageId).FirstOrDefault();
+        }
+        
+        
+        OnPropertyChanged(nameof(PathToKey));
+        OnPropertyChanged(nameof(SelectedFilesystem));
+        OnPropertyChanged(nameof(SelectedInstance));
+        OnPropertyChanged(nameof(SelectedSshKey));
+        OnPropertyChanged(nameof(SelectedImage));
+        
+        
+        
+        
     }
     
     public void SaveAppData()
     {
         // Save application data to a file app.json
         var app_file = $"{_app_data_path}/app.json";
+        
+        //_dataForApp.PathToPrivateKey
+        _dataForApp.PathToPrivateKey = PathToKey;
+        _dataForApp.SelectedInstanceName = SelectedInstance?.Name ?? String.Empty;
+        _dataForApp.SelectedSshKey = SelectedSshKey?.Name ?? String.Empty;
+        _dataForApp.SelectedImageId = SelectedImage?.Id ?? String.Empty;
+        _dataForApp.SelectedFileSystemId = SelectedFilesystem?.Name ?? null;
+        _dataForApp.GuidToken = _dataForApp.GuidToken ?? Guid.NewGuid().ToString();
         var json = System.Text.Json.JsonSerializer.Serialize(_dataForApp);
         File.WriteAllText(app_file, json);
     }
@@ -104,8 +162,12 @@ public class MainGuiBackend
 
     public void Startup()
     {
+        
+        
         Task.Run(async () =>
         {
+            await this.LoadLambdaData();
+            this.LoadAppData();
             var insts = await _cloudClient.ListInstancesAsync();
 
             if (insts == null || !insts.Any())
@@ -186,6 +248,45 @@ public class MainGuiBackend
     {
         var rslt = await _cloudClient.ListSSHKeysAsync();
         return rslt;
+    }
+
+    public async Task LoadLambdaData()
+    {
+        var intypes = this.InStanceTypes();
+        var filesys = this.ListFileSystems();
+        var keys = this.ListSshKeys();
+        var images = this.ListImages();
+        await Task.WhenAll(intypes, filesys, keys, images);
+        Instances.Clear();
+        Filesystems.Clear();
+        SshKeys.Clear();
+        Images.Clear();
+        
+        foreach (var x in intypes.Result)
+        {
+            Instances.Add(x);
+        }
+        foreach (var x in filesys.Result)
+        {
+            Filesystems.Add(x);
+        }
+                    
+        foreach (var x in keys.Result)
+        {
+            SshKeys.Add(x);
+        }
+        foreach (var x in images.Result)
+        {
+            Images.Add(x);
+        }
+        
+        OnPropertyChanged(nameof(Instances));
+        OnPropertyChanged(nameof(Filesystems));
+        OnPropertyChanged(nameof(Images));
+        OnPropertyChanged(nameof(SshKeys));
+        
+        
+        
     }
     
     public List<Image> CompantibleImages(InstanceNameDesc instance, List<Image> images)
@@ -317,7 +418,19 @@ public class MainGuiBackend
     {
         this.SaveAppData();
     }
-    
-    
-    
+
+
+   
+    protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
+
+    protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
+    {
+        if (EqualityComparer<T>.Default.Equals(field, value)) return false;
+        field = value;
+        OnPropertyChanged(propertyName);
+        return true;
+    }
 }
