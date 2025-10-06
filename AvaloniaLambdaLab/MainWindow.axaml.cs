@@ -224,10 +224,24 @@ public class DataPoint
             }
         }
 
-        private void StartButton_Click(object sender, RoutedEventArgs e)
+        private async void StartButton_Click(object sender, RoutedEventArgs e)
         {
+            try
+            {
+                await _backend.StartInstance();
+            }
+            catch (Exception exception)
+            {
+                //Console.WriteLine(exception);
+                LogViewMessage += "ERROR STARTING: " + exception.Message + "\n";
+                this.CallChangeOnGui(nameof(LogViewMessage));
+                return;
+                // throw;
+            }
             IsRunning = true;
             _timer.Start();
+            
+            
             // Add logic for what happens when starting
             // For example, you might start a timer or begin data collection
         }
@@ -251,7 +265,23 @@ public class DataPoint
             if (sender is ComboBox combo && combo.SelectedItem != null)
             {
                 // Process selection
-                var selectedItem = combo.SelectedItem.ToString();
+                var selected = combo.SelectedItem as InstanceNameDesc;
+                if (selected != null)
+                {
+                    var imgs = _backend.CompantibleImages(selected);
+                    this.Images = new ObservableCollection<Service.Library.Image>(imgs);
+
+                    
+                    OnPropertyChanged(nameof(Images));
+
+                    if (this.Images.Count > 0)
+                    {
+                        this.SelectedImage = this.Images[^1];
+                        OnPropertyChanged(nameof(SelectedImage));
+                    }
+
+
+                }
                 // Add your logic here
             }
         }
@@ -347,6 +377,15 @@ public class DataPoint
         
         public event PropertyChangedEventHandler PropertyChanged;
 
+        private void CallOnGui(Action action)
+        {
+            Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(async () =>
+            {
+                //LogViewMessage += s + "\n";
+                action();
+                
+            });
+        }
         protected virtual void OnPropertyChanged(string propertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
