@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Controls;
@@ -26,19 +28,25 @@ public class DataPoint
         private DispatcherTimer _timer;
         private MainGuiBackend _backend = new MainGuiBackend();
 
+        
+        // bound with the back ground ...
         public ObservableCollection<InstanceNameDesc> Instances { get; set; } = new();
         public ObservableCollection<Filesystem> Filesystems { get; set; } = new();
         public ObservableCollection<SSHKey> SshKeys { get; set; } = new();
-        
         public ObservableCollection<Service.Library.Image> Images { get; set; } = new();
         public InstanceNameDesc SelectedInstance { get; set; }
         public Filesystem SelectedFilesystem { get; set; }
         public SSHKey SelectedSshKey { get; set; }
-        
         public Service.Library.Image SelectedImage { get; set; }
+        
+        public ObservableCollection<Instance> RunningInstances { get; set; } = new();
+        
+        public string PathToKey { get; set; } = "";
         
         /* Log information to screen */
         public string LogViewMessage { get; set; } = "";
+        
+        
 
         public MainWindow()
         {
@@ -52,8 +60,34 @@ public class DataPoint
             _timer.Interval = TimeSpan.FromSeconds(3);
             _backend.OnLogMessage += MonitorLog;
             _backend.OnInstanceLaunched += LaunchNotice;
-            LoadData();
+            
+            _backend.PropertyChanged += Backend;
+            
+            //_backend.LoadAllData();
+            //LoadData();
             _backend.Startup();
+        }
+
+        private void Backend(object? sender, PropertyChangedEventArgs e)
+        {
+            try
+            {
+                var th = this.Instances;
+                if (Debugger.IsAttached)
+                {
+                    Console.WriteLine($"Backend Property Changed: {e.PropertyName}");
+                }
+                // backend copy to me...
+                this.SetPropertyValue(e.PropertyName, _backend);
+                
+                this.OnPropertyChanged(e.PropertyName);
+            }
+            catch (Exception exception)
+            {
+                Console.WriteLine(exception);
+                //throw;
+            }
+            
         }
         
         public void LaunchNotice(string msg)
@@ -85,6 +119,7 @@ public class DataPoint
             });
         }
 
+        /*
         private void LoadData()
         {
             Task.Run(async () =>
@@ -125,6 +160,7 @@ public class DataPoint
 
             });
         }
+        */
         
         private void Timer_Tick(object sender, EventArgs e)
         {
@@ -261,6 +297,10 @@ public class DataPoint
             {
                Console.WriteLine("Selected Path: " + path);
             }
+            
+            _backend.PathToKey = path;
+            this.PathToKey = path;
+            OnPropertyChanged(nameof(PathToKey));
         }
         
         private async void OnUnload_Window(object? sender, RoutedEventArgs e)
@@ -290,7 +330,21 @@ public class DataPoint
             }
         }
 
-       
+        private async void DeleteInstance_Click(object sender, RoutedEventArgs e)
+        {
+            // Logic to launch an instance using selected parameters
+            
+            
+        }
+        
+        private void Unload_Window(object? sender, RoutedEventArgs e)
+        {
+            // copy back to backend
+            Utils.CopyProperties(this, _backend);
+            _backend.Shutdown();
+        }
+        
+        
         public event PropertyChangedEventHandler PropertyChanged;
 
         protected virtual void OnPropertyChanged(string propertyName)

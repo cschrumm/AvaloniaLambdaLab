@@ -1,14 +1,17 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:lvc="using:LiveChartsCore.SkiaSharpView.Avalonia"
+        xmlns:Shared="clr-namespace:Service.Library;assembly=Service.Library"
         x:Class="AvaloniaLambdaLab.MainWindow"
         Title="Lambda Cloud View"
         Width="800"
         Height="600"
+        Unloaded="Unload_Window"
         x:Name="MyWindow">
 
     <Grid Margin="20">
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -19,7 +22,7 @@
             <StackPanel Margin="0,0,5,0">
                 <TextBlock Text="Machines:" Margin="0,0,0,5"/>
                 <ComboBox Name="DropDown1" 
-                          Width="300" 
+                          Width="600" 
                           ItemsSource="{Binding ElementName=MyWindow, Path=Instances}"
                           SelectedItem="{Binding ElementName=MyWindow, Path=SelectedInstance}"
                           SelectionChanged="Machines_SelectionChanged">
@@ -28,7 +31,7 @@
             <StackPanel  Margin="0,0,5,0">
                 <TextBlock Text="File System:" Margin="0,0,0,5"/>
                 <ComboBox Name="DropDown2" 
-                          Width="300"
+                          Width="290"
                           ItemsSource="{Binding ElementName=MyWindow, Path=Filesystems}"
                           SelectedItem="{Binding ElementName=MyWindow, Path=SelectedFilesystem}"
                           SelectionChanged="FileSystem_SelectionChanged">
@@ -37,7 +40,7 @@
             <StackPanel Margin="0,0,5,0">
                 <TextBlock Text="SSH Keys:" Margin="0,0,0,5"/>
                 <ComboBox Name="DropDown3" 
-                          Width="300" 
+                          Width="290" 
                             ItemsSource="{Binding ElementName=MyWindow, Path=SshKeys}"
                             SelectedValue="{Binding ElementName=MyWindow, Path=SelectedSshKey}"
                           SelectionChanged="SshKey_SelectionChanged">
@@ -46,7 +49,7 @@
             <StackPanel Margin="0,0,5,0">
                 <TextBlock Text="List Images:" Margin="0,0,0,5"/>
                 <ComboBox Name="ListImages" 
-                          Width="300" 
+                          Width="290" 
                           ItemsSource="{Binding ElementName=MyWindow, Path=Images}"
                           SelectedValue="{Binding ElementName=MyWindow, Path=SelectedImage}"
                           SelectionChanged="ListImages_SelectionChanged">
@@ -54,7 +57,7 @@
             </StackPanel>
             <StackPanel Margin="0,0,5,0">
                 <TextBlock Text="Key For Lambda Lab:" Margin="0,0,0,5"/>
-                <TextBox Name="GitKey" Width="300"></TextBox>
+                <TextBox Name="GitKey" Text="{Binding ElementName=MyWindow, Path=PathToKey}" Width="600"></TextBox>
             </StackPanel>
             <StackPanel Margin="0,0,5,0">
                 <TextBlock Text="" Margin="0,0,0,5"/>
@@ -99,9 +102,28 @@
                     Margin="0,0,10,0"
                     />
         </WrapPanel>
-
+        
+        <ListBox Grid.Row="2" ItemsSource="{Binding ElementName=MyWindow, Path=RunningInstances}">
+            <ListBox.ItemTemplate>
+                <DataTemplate DataType="{x:Type Shared:Instance}">
+                    <StackPanel Orientation="Vertical">
+                        <TextBlock Text="{Binding Name}" Width="150"></TextBlock>
+                        <Button Content="Delete"
+                                Width="100"
+                                Height="25"
+                                Background="Red"
+                                Foreground="White"
+                                Click="DeleteInstance_Click" UseLayoutRounding="True"
+                                Margin="0,0,10,0"
+                                />
+                    </StackPanel>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+        
+        
         <!-- Graph section -->
-        <Border Grid.Row="2" 
+        <Border Grid.Row="3" 
                 BorderBrush="Gray" 
                 BorderThickness="1" 
                 CornerRadius="5">
