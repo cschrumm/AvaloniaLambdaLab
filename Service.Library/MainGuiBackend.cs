@@ -51,6 +51,8 @@ public class MainGuiBackend : INotifyPropertyChanged
     public event Action<string> OnLogMessage;
     public event Action <string> OnInstanceLaunched;
     
+    private List<Service.Library.Image> _allImages = new();
+    
     public event PropertyChangedEventHandler? PropertyChanged;
     // bound to the front end.
     public ObservableCollection<InstanceNameDesc> Instances { get; set; } = new();
@@ -257,6 +259,9 @@ public class MainGuiBackend : INotifyPropertyChanged
         var keys = this.ListSshKeys();
         var images = this.ListImages();
         await Task.WhenAll(intypes, filesys, keys, images);
+
+        _allImages = images.Result;
+        
         Instances.Clear();
         Filesystems.Clear();
         SshKeys.Clear();
@@ -289,9 +294,10 @@ public class MainGuiBackend : INotifyPropertyChanged
         
     }
     
-    public List<Image> CompantibleImages(InstanceNameDesc instance, List<Image> images)
+    public List<Image> CompantibleImages(InstanceNameDesc instance)
     {
-        var ins = images.Where(i => i.Region.Name == instance.Region.Name).ToList();
+       
+        var ins = _allImages.Where(i => i.Region.Name == instance.Region.Name).ToList();
         
         ins.Sort((x, y) => x.Version.CompareTo(y.Version));
         
@@ -305,6 +311,49 @@ public class MainGuiBackend : INotifyPropertyChanged
         return rslt;
     }
     // create a server
+
+    public async Task StartInstance()
+    {
+        /*
+         * What we need to do create an instance....
+         *  
+         */
+        
+        
+        if (SelectedInstance is null) throw new Exception("No instance selected");
+        if (SelectedSshKey is null) throw new Exception("No SSH Key selected");
+        if (SelectedImage is null) throw new Exception("No Image selected");
+        if (PathToKey.IsNullOrEmpty()) throw new Exception("No path to private key specified");
+        if (!File.Exists(PathToKey)) throw new Exception("Path to private key does not exist");
+        
+        /* Crude naming convention */
+        var cntr = RunningInstances.Count + 1;
+        var instName = $"{SelectedInstance.Name}-{cntr}";
+        
+        var insts = await CreateServer(instName, SelectedInstance.IntType.InstanceType.Name,
+            SelectedInstance.Region.Name, SelectedSshKey.Name, SelectedImage.Id,
+            SelectedFilesystem?.Name);
+        
+        if (insts is null || !insts.Any()) throw new Exception("Failed to create instance");
+
+        await Task.Delay(2000); // give it a second to show up in the list
+        
+        var instance = (await _cloudClient.ListInstancesAsync()).Find(i => i.Id == insts[0]);
+        
+        RunningInstances.Add(instance);
+        
+        OnPropertyChanged(nameof(RunningInstances));
+
+        while (instance.Status.ToLower() != "running")
+        {
+            await Task.Delay(4000);
+            OnLogMessage?.Invoke("Waiting to run..: {instance.Status}");
+            instance = (await _cloudClient.ListInstancesAsync()).Find(i => i.Id == insts[0]);
+        }
+        
+        this.SShSetup(instance, PathToKey, _dataForApp.GuidToken);
+
+    }
     public async Task<List<string>> CreateServer(string InstName,string instanceType, string Region,string sshKeyId,
         string image_id,
         string? fileSystemId)
