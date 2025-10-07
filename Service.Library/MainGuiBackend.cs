@@ -256,33 +256,26 @@ public class MainGuiBackend : INotifyPropertyChanged
         return rslt;
     }
 
-    public async Task<List<float>> GetInstanceData()
+    public async Task<SystemStats?> GetInstanceData(Instance instance)
     {
-        var tmp = new List<float>();
-        
-        // add token to header apikey
-        _httpClient.DefaultRequestHeaders.Add("apikey", _dataForApp.GuidToken);
-        foreach (var item in this.RunningInstances)
-        {
-            if(item.Status!="active") continue;
-            _api_url = $"https://{item.Ip}:7777/api/system";
-            var rslt = await _httpClient.GetFromJsonAsync<SystemStats>(_api_url);
-            if (rslt is null) continue;
-            var tt = 0.0f;
-            foreach (var gpu in rslt.GpuStats)
-            {
-               tt = tt + (float)gpu.UtilizationPercentage;
-            }
-               
-            tmp.Add(tt);
-           
-        }
        
-        
-        
-        
+        // add token to header apikey
 
-        return tmp;
+        try
+        {
+            _httpClient.DefaultRequestHeaders.Add("apikey", _dataForApp.GuidToken);
+            var asp_url = $"http://{instance.Ip}:7777/api/system";
+            var rslt = await _httpClient.GetFromJsonAsync<SystemStats>(asp_url);
+            return rslt;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            // throw;
+        }
+        
+        return null;
+        
     }
 
     public async Task LoadLambdaData()
@@ -368,32 +361,33 @@ public class MainGuiBackend : INotifyPropertyChanged
             SelectedFilesystem?.Name);
         
         if (insts is null || !insts.Any()) throw new Exception("Failed to create instance");
+        OnLogMessage?.Invoke($"Waiting for setup");
+        await Task.Delay(20000); // give it a second to show up in the list
 
-        await Task.Delay(2000); // give it a second to show up in the list
-        
-        var instance = (await _cloudClient.ListInstancesAsync()).Find(i => i.Id == insts[0]);
+        var instance = await _cloudClient.GetInstanceAsync(insts[0]); //(await _cloudClient.ListInstancesAsync()).Find(i => i.Id == insts[0]);
         
         RunningInstances.Add(instance);
         
-        OnLogMessage?.Invoke($"Waiting for setup");
+        ;
         OnPropertyChanged(nameof(RunningInstances));
 
         int tries = 0;
         while (instance.Status.ToLower() != "active" 
                && instance.Status.ToLower() != "running")
         {
-            await Task.Delay(1500);
+            await Task.Delay(10000);
             tries++;
             // print on mod 10
             if (tries % 10 == 0)
             {
-                OnLogMessage?.Invoke($"Still waiting to run... {tries * 2} seconds elapsed {instance.Status}");
+                OnLogMessage?.Invoke($"Still waiting to run... {tries*10} seconds elapsed {instance.Status}");
             }
             //OnLogMessage?.Invoke($"Waiting to run..: {instance.Status}");
-            instance = (await _cloudClient.ListInstancesAsync()).Find(i => i.Id == insts[0]);
+            instance = await _cloudClient
+                .GetInstanceAsync(insts[0]); //(await _cloudClient.ListInstancesAsync()).Find(i => i.Id == insts[0]);
         }
         
-        this.SShSetup(instance, PathToKey, _dataForApp.GuidToken);
+        await this.SShSetup(instance, PathToKey, _dataForApp.GuidToken);
 
     }
     public async Task<List<string>> CreateServer(string InstName,string instanceType, string Region,string sshKeyId,
@@ -438,15 +432,21 @@ public class MainGuiBackend : INotifyPropertyChanged
         OnInstanceLaunched?.Invoke($"Instance Terminated");
     }
     
-    public void SShSetup(Instance instance, string kypath, string token)
+    public async Task SShSetup(Instance instance, string kypath, string token)
     {
         var sshManager = new SshClientManager();
 
         sshManager.ConnectWithPrivateKey(instance.Ip, 22, "ubuntu", kypath);
         
 
-        this.SetupRemoteServer(sshManager, token);
+        await this.SetupRemoteServer(sshManager, token);
 
+    }
+
+    public async Task<Instance> GetInstance(string instanceId)
+    {
+        var ins = await _cloudClient.GetInstanceAsync(instanceId);
+        return ins;
     }
     
     public void LaunchBrowser(Instance instance)
@@ -459,7 +459,7 @@ public class MainGuiBackend : INotifyPropertyChanged
             var psi = new ProcessStartInfo
             {
                 FileName = "google-chrome",
-                Arguments = instance.JupyterUrl,
+                Arguments = "--new-window " + instance.JupyterUrl,
                 UseShellExecute = false
             };
             Process.Start(psi);
@@ -470,7 +470,7 @@ public class MainGuiBackend : INotifyPropertyChanged
         }
     }
     
-    private void SetupRemoteServer(SshClientManager manager, string token)
+    private async Task SetupRemoteServer(SshClientManager manager, string token)
     {
         /*
          *  Sets up and runs the remote server....
@@ -499,8 +499,9 @@ public class MainGuiBackend : INotifyPropertyChanged
             // get current datetime
             var inpt = $"{System.DateTime.Now} - Executing: {cmd}";
             OnLogMessage?.Invoke(inpt);
+            await Task.Delay(100);
             var rslt = manager.ExecuteCommand(cmd);
-            System.Threading.Thread.Sleep(10);
+            await Task.Delay(100);
             OnLogMessage?.Invoke(rslt);
         }
 

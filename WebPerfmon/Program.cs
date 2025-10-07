@@ -35,7 +35,7 @@ builder.Services.AddRateLimiter(options =>
 // locate token key
 
 
-builder.WebHost.UseUrls("http://127.0.0.1:7777");
+builder.WebHost.UseUrls("http://0.0.0.0:7777");
 
 
 
