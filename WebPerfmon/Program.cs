@@ -29,6 +29,7 @@ builder.Services.AddRateLimiter(options =>
         fixedWindowOptions.Window = TimeSpan.FromSeconds(3); // Within a 10-second window
         fixedWindowOptions.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
         fixedWindowOptions.QueueLimit = 4; // No queueing, reject immediately
+        
     });
 });
 
