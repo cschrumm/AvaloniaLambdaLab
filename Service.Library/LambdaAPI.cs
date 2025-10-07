@@ -58,6 +58,11 @@ public class Instance
 
     [JsonPropertyName("firewall_rulesets")]
     public List<FirewallRulesetEntry>? FirewallRulesets { get; set; }
+
+    public override string ToString()
+    {
+        return $"{Name} - {Status} - {InstanceType.Name} - {Region.Name}";
+    }
 }
 
 public class Region

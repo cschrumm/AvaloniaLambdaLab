@@ -82,3 +82,5 @@
 /home/madmax-machine/Documents/mycode/AvaloniaLambdaLab/AvaloniaLambdaLab/obj/Debug/net9.0/AvaloniaLambdaLab.sourcelink.json
 /home/madmax-machine/Documents/mycode/AvaloniaLambdaLab/AvaloniaLambdaLab/bin/Debug/net9.0/Service.Library.dll
 /home/madmax-machine/Documents/mycode/AvaloniaLambdaLab/AvaloniaLambdaLab/bin/Debug/net9.0/Service.Library.pdb
+/home/madmax-machine/Documents/mycode/AvaloniaLambdaLab/AvaloniaLambdaLab/bin/Debug/net9.0/DialogHost.Avalonia.dll
+/home/madmax-machine/Documents/mycode/AvaloniaLambdaLab/AvaloniaLambdaLab/bin/Debug/net9.0/MsBox.Avalonia.dll

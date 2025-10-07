@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "LJE4F0b+hfA=",
+  "dgSpecHash": "uQv4LH/AP4I=",
   "success": true,
   "projectFilePath": "/home/madmax-machine/Documents/mycode/AvaloniaLambdaLab/AvaloniaLambdaLab/AvaloniaLambdaLab.csproj",
   "expectedPackageFiles": [
@@ -20,6 +20,7 @@
     "/home/madmax-machine/.nuget/packages/avalonia.win32/11.3.6/avalonia.win32.11.3.6.nupkg.sha512",
     "/home/madmax-machine/.nuget/packages/avalonia.x11/11.3.6/avalonia.x11.11.3.6.nupkg.sha512",
     "/home/madmax-machine/.nuget/packages/bouncycastle.cryptography/2.5.1/bouncycastle.cryptography.2.5.1.nupkg.sha512",
+    "/home/madmax-machine/.nuget/packages/dialoghost.avalonia/0.8.1/dialoghost.avalonia.0.8.1.nupkg.sha512",
     "/home/madmax-machine/.nuget/packages/harfbuzzsharp/8.3.1.1/harfbuzzsharp.8.3.1.1.nupkg.sha512",
     "/home/madmax-machine/.nuget/packages/harfbuzzsharp.nativeassets.linux/8.3.1.1/harfbuzzsharp.nativeassets.linux.8.3.1.1.nupkg.sha512",
     "/home/madmax-machine/.nuget/packages/harfbuzzsharp.nativeassets.macos/8.3.1.1/harfbuzzsharp.nativeassets.macos.8.3.1.1.nupkg.sha512",
@@ -28,6 +29,7 @@
     "/home/madmax-machine/.nuget/packages/livechartscore/2.0.0-rc6.1/livechartscore.2.0.0-rc6.1.nupkg.sha512",
     "/home/madmax-machine/.nuget/packages/livechartscore.skiasharpview/2.0.0-rc6.1/livechartscore.skiasharpview.2.0.0-rc6.1.nupkg.sha512",
     "/home/madmax-machine/.nuget/packages/livechartscore.skiasharpview.avalonia/2.0.0-rc6.1/livechartscore.skiasharpview.avalonia.2.0.0-rc6.1.nupkg.sha512",
+    "/home/madmax-machine/.nuget/packages/messagebox.avalonia/3.2.0/messagebox.avalonia.3.2.0.nupkg.sha512",
     "/home/madmax-machine/.nuget/packages/microcom.runtime/0.11.0/microcom.runtime.0.11.0.nupkg.sha512",
     "/home/madmax-machine/.nuget/packages/microsoft.extensions.dependencyinjection.abstractions/8.0.2/microsoft.extensions.dependencyinjection.abstractions.8.0.2.nupkg.sha512",
     "/home/madmax-machine/.nuget/packages/microsoft.extensions.logging.abstractions/8.0.3/microsoft.extensions.logging.abstractions.8.0.3.nupkg.sha512",

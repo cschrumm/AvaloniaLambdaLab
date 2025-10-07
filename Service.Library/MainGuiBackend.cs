@@ -172,14 +172,17 @@ public class MainGuiBackend : INotifyPropertyChanged
             this.LoadAppData();
             var insts = await _cloudClient.ListInstancesAsync();
 
-            if (insts == null || !insts.Any())
+            foreach (var inst in insts)
             {
-                InitalizeInstance(insts[0]);
+                RunningInstances.Add(inst);
             }
+            
+            OnPropertyChanged(nameof(RunningInstances));
+            
         });
 
     }
-
+    /*
     private async Task InitalizeInstance(Instance instance)
     {
         if (instance is null) throw new ArgumentNullException(nameof(instance));
@@ -201,6 +204,7 @@ public class MainGuiBackend : INotifyPropertyChanged
         IsRunning = true;
         OnInstanceLaunched?.Invoke("Instance Launched");
     }
+    */
     
     public async Task<SystemStats?> RetrieveSystemStats()
     {
@@ -329,7 +333,7 @@ public class MainGuiBackend : INotifyPropertyChanged
         /* Crude naming convention */
         var cntr = RunningInstances.Count + 1;
         var instName = $"{SelectedInstance.Name}-{cntr}";
-        
+        OnLogMessage?.Invoke($"Staring..");
         var insts = await CreateServer(instName, SelectedInstance.IntType.InstanceType.Name,
             SelectedInstance.Region.Name, SelectedSshKey.Name, SelectedImage.Id,
             SelectedFilesystem?.Name);
@@ -342,12 +346,21 @@ public class MainGuiBackend : INotifyPropertyChanged
         
         RunningInstances.Add(instance);
         
+        OnLogMessage?.Invoke($"Waiting for setup");
         OnPropertyChanged(nameof(RunningInstances));
 
-        while (instance.Status.ToLower() != "running")
+        int tries = 0;
+        while (instance.Status.ToLower() != "active" 
+               && instance.Status.ToLower() != "running")
         {
-            await Task.Delay(4000);
-            OnLogMessage?.Invoke("Waiting to run..: {instance.Status}");
+            await Task.Delay(1500);
+            tries++;
+            // print on mod 10
+            if (tries % 10 == 0)
+            {
+                OnLogMessage?.Invoke($"Still waiting to run... {tries * 2} seconds elapsed {instance.Status}");
+            }
+            //OnLogMessage?.Invoke($"Waiting to run..: {instance.Status}");
             instance = (await _cloudClient.ListInstancesAsync()).Find(i => i.Id == insts[0]);
         }
         
@@ -383,15 +396,16 @@ public class MainGuiBackend : INotifyPropertyChanged
 
     }
     // delete the server
-    public async Task DeleteServer(string instanceId)
+    public async Task DeleteServer(Instance instance)
     {
-        var rslt = await _cloudClient.TerminateInstancesAsync(new InstanceTerminateRequest(){ InstanceIds = new List<string>() { instanceId } });
+        var rslt = await _cloudClient.TerminateInstancesAsync(new InstanceTerminateRequest(){ InstanceIds = new List<string>() { instance.Id } });
 
         _api_url = String.Empty;
         _launched_url = String.Empty;
         
         IsRunning = false;
-        
+        RunningInstances.Remove(instance);
+        OnPropertyChanged(nameof(RunningInstances));
         OnInstanceLaunched?.Invoke($"Instance Terminated");
     }
     
@@ -406,7 +420,7 @@ public class MainGuiBackend : INotifyPropertyChanged
 
     }
     
-    public void LaunchBrowser()
+    public void LaunchBrowser(Instance instance)
     {
         try
         {
@@ -416,7 +430,7 @@ public class MainGuiBackend : INotifyPropertyChanged
             var psi = new ProcessStartInfo
             {
                 FileName = "google-chrome",
-                Arguments = _launched_url,
+                Arguments = instance.JupyterUrl,
                 UseShellExecute = false
             };
             Process.Start(psi);

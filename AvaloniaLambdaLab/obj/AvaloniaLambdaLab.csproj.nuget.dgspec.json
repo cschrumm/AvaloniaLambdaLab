@@ -80,6 +80,10 @@
               "target": "Package",
               "version": "[2.0.0-rc6.1, )"
             },
+            "MessageBox.Avalonia": {
+              "target": "Package",
+              "version": "[3.2.0, )"
+            },
             "SSH.NET": {
               "target": "Package",
               "version": "[2025.0.0, )"
