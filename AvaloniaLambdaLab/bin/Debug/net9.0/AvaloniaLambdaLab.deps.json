@@ -16,6 +16,7 @@
           "LiveChartsCore": "2.0.0-rc6.1",
           "LiveChartsCore.SkiaSharpView": "2.0.0-rc6.1",
           "LiveChartsCore.SkiaSharpView.Avalonia": "2.0.0-rc6.1",
+          "MessageBox.Avalonia": "3.2.0",
           "SSH.NET": "2025.0.0",
           "Service.Library": "1.0.0"
         },
@@ -261,6 +262,17 @@
           }
         }
       },
+      "DialogHost.Avalonia/0.8.1": {
+        "dependencies": {
+          "Avalonia": "11.3.6"
+        },
+        "runtime": {
+          "lib/netstandard2.0/DialogHost.Avalonia.dll": {
+            "assemblyVersion": "0.8.1.0",
+            "fileVersion": "0.8.1.0"
+          }
+        }
+      },
       "HarfBuzzSharp/8.3.1.1": {
         "dependencies": {
           "HarfBuzzSharp.NativeAssets.Win32": "8.3.1.1",
@@ -392,6 +404,18 @@
           "lib/net8.0/LiveChartsCore.SkiaSharpView.Avalonia.dll": {
             "assemblyVersion": "2.0.0.0",
             "fileVersion": "2.0.0.0"
+          }
+        }
+      },
+      "MessageBox.Avalonia/3.2.0": {
+        "dependencies": {
+          "Avalonia": "11.3.6",
+          "DialogHost.Avalonia": "0.8.1"
+        },
+        "runtime": {
+          "lib/netstandard2.0/MsBox.Avalonia.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
           }
         }
       },
@@ -657,6 +681,13 @@
       "path": "bouncycastle.cryptography/2.5.1",
       "hashPath": "bouncycastle.cryptography.2.5.1.nupkg.sha512"
     },
+    "DialogHost.Avalonia/0.8.1": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-RLBOMqjJPgSmwe0i1pzX3Q7Pn0i4xE/E1b774krd4VyEkaorz1AYMdYQHyIfuhtQv5NntZyS0MuQbxJl/PhzBg==",
+      "path": "dialoghost.avalonia/0.8.1",
+      "hashPath": "dialoghost.avalonia.0.8.1.nupkg.sha512"
+    },
     "HarfBuzzSharp/8.3.1.1": {
       "type": "package",
       "serviceable": true,
@@ -712,6 +743,13 @@
       "sha512": "sha512-r5KIlmOWKCYznnNsED3G5V1kRaq4dVxxcfvMfgt9YKsjyDPD1ARVSJJimARQ2C6Zlavk9JqZohrAm4sQA4T4Lg==",
       "path": "livechartscore.skiasharpview.avalonia/2.0.0-rc6.1",
       "hashPath": "livechartscore.skiasharpview.avalonia.2.0.0-rc6.1.nupkg.sha512"
+    },
+    "MessageBox.Avalonia/3.2.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-f4iJxmyF0fKoJQdMCiSSRitP/niUl4g1mSBLGQ9+/58ZXrhjUImnuLdbuBY36n+JpMegy4FA62s588yJkbbjCA==",
+      "path": "messagebox.avalonia/3.2.0",
+      "hashPath": "messagebox.avalonia.3.2.0.nupkg.sha512"
     },
     "MicroCom.Runtime/0.11.0": {
       "type": "package",

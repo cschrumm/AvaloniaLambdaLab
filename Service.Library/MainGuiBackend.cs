@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
 using System.Net.Http;
 using System.Net.Http.Json;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Service.Library;
 
@@ -21,18 +23,50 @@ public class InstanceNameDesc
         return $"{Name} - {Region.Name} -  ${IntType.InstanceType.PriceCentsPerHour/100.0}/hr";
     }
 }
-public class MainGuiBackend
+
+public class DataForApp
 {
+    public string SelectedInstanceName { get; set; } = String.Empty;
+    
+    public string SelectedSshKey { get; set; } = String.Empty;
+    public string SelectedImageId { get; set; } = String.Empty;
+    public string PathToPrivateKey { get; set; } = String.Empty;
+    public string SelectedFileSystemId { get; set; } = String.Empty;
+    public string GuidToken { get; set; } = String.Empty;
+    
+}
+
+
+public class MainGuiBackend : INotifyPropertyChanged
+{
+    // talks to the lambda cloud and manages the instance
     private readonly LambdaCloudClient _cloudClient;
+    // used to talk to the instance api
     private readonly HttpClient _httpClient;
+    // launched url for jupyter lab
     private string _launched_url = "";
     private string _api_url = "";
-
-    private string _guid_token = "6157fe8c-8081-4615-ad79-445af35223fd";
-    
+    private string _app_data_path = System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "/AvaloniaLambdaLab";
+    private DataForApp _dataForApp;
     public event Action<string> OnLogMessage;
-    
     public event Action <string> OnInstanceLaunched;
+    
+    private List<Service.Library.Image> _allImages = new();
+    
+    public event PropertyChangedEventHandler? PropertyChanged;
+    // bound to the front end.
+    public ObservableCollection<InstanceNameDesc> Instances { get; set; } = new();
+    public ObservableCollection<Filesystem> Filesystems { get; set; } = new();
+    public ObservableCollection<SSHKey> SshKeys { get; set; } = new();
+    public ObservableCollection<Service.Library.Image> Images { get; set; } = new();
+    public InstanceNameDesc SelectedInstance { get; set; }
+    public Filesystem SelectedFilesystem { get; set; }
+    public SSHKey SelectedSshKey { get; set; }
+    public Service.Library.Image SelectedImage { get; set; }
+        
+    public ObservableCollection<Instance> RunningInstances { get; set; } = new();
+    
+    public string PathToKey { get; set; } = "";
     
     public bool IsRunning { get; private set; }
     public MainGuiBackend()
@@ -40,36 +74,115 @@ public class MainGuiBackend
         var apiKey = System.Environment.GetEnvironmentVariable("LAMBDA_KEY"); // Load from secure storage or environment variable
         _httpClient = new HttpClient();
         _cloudClient = new LambdaCloudClient(apiKey,_httpClient);
+
+        if (!Directory.Exists(_app_data_path))
+        {
+            try
+            {
+                Directory.CreateDirectory(_app_data_path);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+               // throw;
+            }
+        }
+        
+        //this.LoadAppData();
         
     }
-    /*
-    public event Action<string> SshLogMessage
+
+    public void LoadAppData()
     {
-        add { OnLogMessage += value; }
-        remove { OnLogMessage -= value; }
+        // Load any saved application data from a file app.json
+        var app_file = $"{_app_data_path}/app.json";
+        if (File.Exists(app_file))
+        {
+            var json = File.ReadAllText(app_file);
+            _dataForApp = System.Text.Json.JsonSerializer.Deserialize<DataForApp>(json) ?? new DataForApp();
+            
+        }
+        else
+        {
+            _dataForApp = new DataForApp();
+        }
+        
+        if(_dataForApp.GuidToken is null || _dataForApp.GuidToken == String.Empty)
+            _dataForApp.GuidToken = Guid.NewGuid().ToString();
+        
+        
+        PathToKey = _dataForApp.PathToPrivateKey ?? String.Empty;
+
+        if (!_dataForApp.SelectedFileSystemId.IsNullOrEmpty())
+        {
+           SelectedFilesystem = Filesystems.FirstOrDefault(f => f.Name == _dataForApp.SelectedFileSystemId);
+        }
+
+        if (!_dataForApp.SelectedInstanceName.IsNullOrEmpty())
+        {
+            SelectedInstance = Instances.Where(i => i.Name == _dataForApp.SelectedInstanceName).FirstOrDefault();
+        }
+        
+        if (!_dataForApp.SelectedSshKey.IsNullOrEmpty())
+        {
+            SelectedSshKey = SshKeys.Where(s => s.Name == _dataForApp.SelectedSshKey).FirstOrDefault();
+        }
+        
+        if (!_dataForApp.SelectedImageId.IsNullOrEmpty())
+        {
+            SelectedImage = Images.Where(i => i.Id == _dataForApp.SelectedImageId).FirstOrDefault();
+        }
+        
+        
+        OnPropertyChanged(nameof(PathToKey));
+        OnPropertyChanged(nameof(SelectedFilesystem));
+        OnPropertyChanged(nameof(SelectedInstance));
+        OnPropertyChanged(nameof(SelectedSshKey));
+        OnPropertyChanged(nameof(SelectedImage));
+        
+        
+        
+        
     }
     
-    public event Action<string> InstanceLaunched
+    public void SaveAppData()
     {
-        add { OnInstanceLaunched += value; }
-        remove { OnInstanceLaunched -= value; }
+        // Save application data to a file app.json
+        var app_file = $"{_app_data_path}/app.json";
+        
+        //_dataForApp.PathToPrivateKey
+        _dataForApp.PathToPrivateKey = PathToKey;
+        _dataForApp.SelectedInstanceName = SelectedInstance?.Name ?? String.Empty;
+        _dataForApp.SelectedSshKey = SelectedSshKey?.Name ?? String.Empty;
+        _dataForApp.SelectedImageId = SelectedImage?.Id ?? String.Empty;
+        _dataForApp.SelectedFileSystemId = SelectedFilesystem?.Name ?? null;
+        _dataForApp.GuidToken = _dataForApp.GuidToken ?? Guid.NewGuid().ToString();
+        var json = System.Text.Json.JsonSerializer.Serialize(_dataForApp);
+        File.WriteAllText(app_file, json);
     }
-    */
+    
 
     public void Startup()
     {
+        
+        
         Task.Run(async () =>
         {
+            await this.LoadLambdaData();
+            this.LoadAppData();
             var insts = await _cloudClient.ListInstancesAsync();
 
-            if (insts == null || !insts.Any())
+            foreach (var inst in insts)
             {
-                InitalizeInstance(insts[0]);
+                RunningInstances.Add(inst);
             }
+            
+            OnPropertyChanged(nameof(RunningInstances));
+            
         });
 
     }
-
+    /*
     private async Task InitalizeInstance(Instance instance)
     {
         if (instance is null) throw new ArgumentNullException(nameof(instance));
@@ -91,6 +204,7 @@ public class MainGuiBackend
         IsRunning = true;
         OnInstanceLaunched?.Invoke("Instance Launched");
     }
+    */
     
     public async Task<SystemStats?> RetrieveSystemStats()
     {
@@ -125,31 +239,91 @@ public class MainGuiBackend
     {
         
         var rslt = await _cloudClient.ListFilesystemsAsync();
-        
         return rslt;
-
 
     }
     
     public async Task<List<Instance>> ListInstances()
     {
         var rslt = await _cloudClient.ListInstancesAsync();
-        
         return rslt;
         
     }
     // get a list of ssh keys
     public async Task<List<SSHKey>> ListSshKeys()
     {
-        
         var rslt = await _cloudClient.ListSSHKeysAsync();
-        
         return rslt;
     }
-    
-    public List<Image> CompantibleImages(InstanceNameDesc instance, List<Image> images)
+
+    public async Task<SystemStats?> GetInstanceData(Instance instance)
     {
-        var ins = images.Where(i => i.Region.Name == instance.Region.Name).ToList();
+       
+        // add token to header apikey
+
+        try
+        {
+            _httpClient.DefaultRequestHeaders.Add("apikey", _dataForApp.GuidToken);
+            var asp_url = $"http://{instance.Ip}:7777/api/system";
+            var rslt = await _httpClient.GetFromJsonAsync<SystemStats>(asp_url);
+            return rslt;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            // throw;
+        }
+        
+        return null;
+        
+    }
+
+    public async Task LoadLambdaData()
+    {
+        var intypes = this.InStanceTypes();
+        var filesys = this.ListFileSystems();
+        var keys = this.ListSshKeys();
+        var images = this.ListImages();
+        await Task.WhenAll(intypes, filesys, keys, images);
+
+        _allImages = images.Result;
+        
+        Instances.Clear();
+        Filesystems.Clear();
+        SshKeys.Clear();
+        Images.Clear();
+        
+        foreach (var x in intypes.Result)
+        {
+            Instances.Add(x);
+        }
+        foreach (var x in filesys.Result)
+        {
+            Filesystems.Add(x);
+        }
+                    
+        foreach (var x in keys.Result)
+        {
+            SshKeys.Add(x);
+        }
+        foreach (var x in images.Result)
+        {
+            Images.Add(x);
+        }
+        
+        OnPropertyChanged(nameof(Instances));
+        OnPropertyChanged(nameof(Filesystems));
+        OnPropertyChanged(nameof(Images));
+        OnPropertyChanged(nameof(SshKeys));
+        
+        
+        
+    }
+    
+    public List<Image> CompantibleImages(InstanceNameDesc instance)
+    {
+       
+        var ins = _allImages.Where(i => i.Region.Name == instance.Region.Name).ToList();
         
         ins.Sort((x, y) => x.Version.CompareTo(y.Version));
         
@@ -163,50 +337,63 @@ public class MainGuiBackend
         return rslt;
     }
     // create a server
+
+    public async Task StartInstance()
+    {
+        /*
+         * What we need to do create an instance....
+         *  
+         */
+        
+        
+        if (SelectedInstance is null) throw new Exception("No instance selected");
+        if (SelectedSshKey is null) throw new Exception("No SSH Key selected");
+        if (SelectedImage is null) throw new Exception("No Image selected");
+        if (PathToKey.IsNullOrEmpty()) throw new Exception("No path to private key specified");
+        if (!File.Exists(PathToKey)) throw new Exception("Path to private key does not exist");
+        
+        /* Crude naming convention */
+        var cntr = RunningInstances.Count + 1;
+        var instName = $"{SelectedInstance.Name}-{cntr}";
+        OnLogMessage?.Invoke($"Staring..");
+        var insts = await CreateServer(instName, SelectedInstance.IntType.InstanceType.Name,
+            SelectedInstance.Region.Name, SelectedSshKey.Name, SelectedImage.Id,
+            SelectedFilesystem?.Name);
+        
+        if (insts is null || !insts.Any()) throw new Exception("Failed to create instance");
+        OnLogMessage?.Invoke($"Waiting for setup");
+        await Task.Delay(20000); // give it a second to show up in the list
+
+        var instance = await _cloudClient.GetInstanceAsync(insts[0]); //(await _cloudClient.ListInstancesAsync()).Find(i => i.Id == insts[0]);
+        
+        RunningInstances.Add(instance);
+        
+        ;
+        OnPropertyChanged(nameof(RunningInstances));
+
+        int tries = 0;
+        while (instance.Status.ToLower() != "active" 
+               && instance.Status.ToLower() != "running")
+        {
+            await Task.Delay(10000);
+            tries++;
+            // print on mod 10
+            if (tries % 10 == 0)
+            {
+                OnLogMessage?.Invoke($"Still waiting to run... {tries*10} seconds elapsed {instance.Status}");
+            }
+            //OnLogMessage?.Invoke($"Waiting to run..: {instance.Status}");
+            instance = await _cloudClient
+                .GetInstanceAsync(insts[0]); //(await _cloudClient.ListInstancesAsync()).Find(i => i.Id == insts[0]);
+        }
+        
+        await this.SShSetup(instance, PathToKey, _dataForApp.GuidToken);
+
+    }
     public async Task<List<string>> CreateServer(string InstName,string instanceType, string Region,string sshKeyId,
         string image_id,
         string? fileSystemId)
     {
-        
-        /*
-         *
-         * curl --request POST --url 'https://cloud.lambda.ai/api/v1/instance-operations/launch' \
-                --header 'accept: application/json' \
-                --user '<YOUR-API-KEY>:' \
-                --data '{
-             "region_name": "europe-central-1",
-             "instance_type_name": "gpu_8x_a100",
-             "ssh_key_names": [
-               "my-public-key"
-             ],
-             "file_system_names": [
-               "my-filesystem"
-             ],
-             "file_system_mounts": [
-               {
-                 "mount_point": "/data/custom-mount-point",
-                 "file_system_id": "398578a2336b49079e74043f0bd2cfe8"
-               }
-             ],
-             "hostname": "headnode1",
-             "name": "My Instance",
-             "image": {
-               "id": "string"
-             },
-             "user_data": "string",
-             "tags": [
-               {
-                 "key": "key1",
-                 "value": "value1"
-               }
-             ],
-             "firewall_rulesets": [
-               {
-                 "id": "c4d291f47f9d436fa39f58493ce3b50d"
-               }
-             ]
-           }'
-         */
         
         /*
          *  Required:
@@ -232,37 +419,37 @@ public class MainGuiBackend
 
     }
     // delete the server
-    public async Task DeleteServer(string instanceId)
+    public async Task DeleteServer(Instance instance)
     {
-        var rslt = await _cloudClient.TerminateInstancesAsync(new InstanceTerminateRequest(){ InstanceIds = new List<string>() { instanceId } });
+        var rslt = await _cloudClient.TerminateInstancesAsync(new InstanceTerminateRequest(){ InstanceIds = new List<string>() { instance.Id } });
 
         _api_url = String.Empty;
         _launched_url = String.Empty;
         
         IsRunning = false;
-        
+        RunningInstances.Remove(instance);
+        OnPropertyChanged(nameof(RunningInstances));
         OnInstanceLaunched?.Invoke($"Instance Terminated");
     }
     
-    public void SShSetup(Instance instance, string kypath, string token)
+    public async Task SShSetup(Instance instance, string kypath, string token)
     {
         var sshManager = new SshClientManager();
 
         sshManager.ConnectWithPrivateKey(instance.Ip, 22, "ubuntu", kypath);
-        // Example file upload
-        // sshManager.UploadFile("localfile.txt", "/root/remotefile.txt");
+        
 
-        // Example file download
-        // sshManager.DownloadFile("/root/remotefile.txt", "localfile.txt");
-
-        // Disconnect when done
-        //sshManager.Disconnect();
-
-        this.SetupRemoteServer(sshManager, token);
+        await this.SetupRemoteServer(sshManager, token);
 
     }
+
+    public async Task<Instance> GetInstance(string instanceId)
+    {
+        var ins = await _cloudClient.GetInstanceAsync(instanceId);
+        return ins;
+    }
     
-    public void LaunchBrowser()
+    public void LaunchBrowser(Instance instance)
     {
         try
         {
@@ -272,7 +459,7 @@ public class MainGuiBackend
             var psi = new ProcessStartInfo
             {
                 FileName = "google-chrome",
-                Arguments = _launched_url,
+                Arguments = "--new-window " + instance.JupyterUrl,
                 UseShellExecute = false
             };
             Process.Start(psi);
@@ -283,7 +470,7 @@ public class MainGuiBackend
         }
     }
     
-    private void SetupRemoteServer(SshClientManager manager, string token)
+    private async Task SetupRemoteServer(SshClientManager manager, string token)
     {
         /*
          *  Sets up and runs the remote server....
@@ -312,43 +499,31 @@ public class MainGuiBackend
             // get current datetime
             var inpt = $"{System.DateTime.Now} - Executing: {cmd}";
             OnLogMessage?.Invoke(inpt);
+            await Task.Delay(100);
             var rslt = manager.ExecuteCommand(cmd);
-            System.Threading.Thread.Sleep(10);
+            await Task.Delay(100);
             OnLogMessage?.Invoke(rslt);
         }
 
-        /*
-         *
-         * sudo apt update
-           sudo apt install git -y
-           git config --global user.name "Your Name"
-           git config --global user.email "your.email@example.com"
-           git clone git@github.com:username/repository-name.git
-           cd repository-name
-
-           wget https://packages.microsoft.com/config/ubuntu/22.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
-           sudo dpkg -i packages-microsoft-prod.deb
-           rm packages-microsoft-prod.deb
-           sudo apt update
-           sudo apt install dotnet-sdk-9.0 -y
-           dotnet restore
-           dotnet build
-           uname -m # check architecture x86_64 or aarch64
-           dotnet publish -c Release -r linux-x64 --self-contained -o ./publish
-           or
-           dotnet publish -c Release -r linux-arm64 --self-contained -o ./publish
-           cd publish
-
-           sudo ufw allow 5000
-           sudo ufw allow 5001
-           run the app in the background
-           nohup dotnet YourAppName --url http://localhost:7777 > app.log 2>&1 &
-         */
-
-
-
     }
-    
-    
-    
+
+    public async void Shutdown()
+    {
+        this.SaveAppData();
+    }
+
+
+   
+    protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
+
+    protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
+    {
+        if (EqualityComparer<T>.Default.Equals(field, value)) return false;
+        field = value;
+        OnPropertyChanged(propertyName);
+        return true;
+    }
 }

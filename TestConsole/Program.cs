@@ -44,20 +44,7 @@ var to_st = inst.Where(k=> k.Name.IndexOf("gh200") > 0).FirstOrDefault();
 
 var ids = await mncl.CreateServer("Test-Instance-1", to_st?.Name, to_st?.Region?.Name, ky.Name,null);
 
-  var inst = await mncl.InStanceTypes();
-   var kys = await mncl.ListSshKeys();
-   var fss = await mncl.ListFileSystems();
-   var imgs = await mncl.ListImages();
-   
-   var to_st = inst.Where(k=> k.Name.IndexOf("gh200") > 0).FirstOrDefault();
-   
-   var ky = kys.Where(k => k.Name.IndexOf("max") > 0).FirstOrDefault();
-   
-   var cmp = mncl.CompantibleImages(to_st, imgs);
-   
-   var lst_im = cmp[^1];
-   
-   var ids = await mncl.CreateServer("Test-Instance-1", to_st?.Name, to_st?.Region?.Name, ky.Name,lst_im.Id,null);
+ 
    
    
    Console.WriteLine("good");
@@ -68,6 +55,22 @@ var instances = await mncl.ListInstances();
    mncl.SShSetup(instances[0], kypath, (new Guid()).ToString());
    
 */
+
+var inst = await mncl.InStanceTypes();
+var kys = await mncl.ListSshKeys();
+var fss = await mncl.ListFileSystems();
+var imgs = await mncl.ListImages();
+   
+var to_st = inst.Where(k=> k.Name.IndexOf("gh200") > 0).FirstOrDefault();
+   
+var ky = kys.Where(k => k.Name.IndexOf("max") > 0).FirstOrDefault();
+
+var cmp = imgs.Where(i => i.Region.Name == to_st.Region.Name); // mncl.CompantibleImages(to_st, imgs);
+
+var tmp = cmp.ToList();
+var lst_im = cmp.ToList()[^1];
+   
+var ids = await mncl.CreateServer("Test-Instance-1", to_st?.Name, to_st?.Region?.Name, ky.Name,lst_im.Id,null);
 
 var instances = await mncl.ListInstances();
    

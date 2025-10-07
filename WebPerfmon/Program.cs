@@ -29,13 +29,14 @@ builder.Services.AddRateLimiter(options =>
         fixedWindowOptions.Window = TimeSpan.FromSeconds(3); // Within a 10-second window
         fixedWindowOptions.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
         fixedWindowOptions.QueueLimit = 4; // No queueing, reject immediately
+        
     });
 });
 
 // locate token key
 
 
-builder.WebHost.UseUrls("http://127.0.0.1:7777");
+builder.WebHost.UseUrls("http://0.0.0.0:7777");
 
 
 

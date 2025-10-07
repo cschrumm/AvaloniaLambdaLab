@@ -1,106 +1,123 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:lvc="using:LiveChartsCore.SkiaSharpView.Avalonia"
+        xmlns:lvc_core="using:LiveChartsCore"
+        xmlns:Shared="clr-namespace:Service.Library;assembly=Service.Library"
         x:Class="AvaloniaLambdaLab.MainWindow"
         Title="Lambda Cloud View"
         Width="800"
         Height="600"
+        Unloaded="Unload_Window"
+        Loaded="OnLoaded"
         x:Name="MyWindow">
 
     <Grid Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
         <!-- Top section with dropdowns -->
-        <WrapPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,20">
+        <WrapPanel Grid.Row="0" Orientation="Horizontal" LineSpacing="10" Margin="0,0,0,20">
             <StackPanel Margin="0,0,5,0">
                 <TextBlock Text="Machines:" Margin="0,0,0,5"/>
                 <ComboBox Name="DropDown1" 
-                          Width="300" 
+                          Width="600" 
                           ItemsSource="{Binding ElementName=MyWindow, Path=Instances}"
                           SelectedItem="{Binding ElementName=MyWindow, Path=SelectedInstance}"
-                          SelectionChanged="DropDown1_SelectionChanged">
+                          SelectionChanged="Machines_SelectionChanged">
                 </ComboBox>
             </StackPanel>
             <StackPanel  Margin="0,0,5,0">
                 <TextBlock Text="File System:" Margin="0,0,0,5"/>
                 <ComboBox Name="DropDown2" 
-                          Width="300"
+                          Width="290"
                           ItemsSource="{Binding ElementName=MyWindow, Path=Filesystems}"
                           SelectedItem="{Binding ElementName=MyWindow, Path=SelectedFilesystem}"
-                          SelectionChanged="DropDown2_SelectionChanged">
+                          SelectionChanged="FileSystem_SelectionChanged">
                 </ComboBox>
             </StackPanel>
             <StackPanel Margin="0,0,5,0">
                 <TextBlock Text="SSH Keys:" Margin="0,0,0,5"/>
                 <ComboBox Name="DropDown3" 
-                          Width="300" 
+                          Width="290" 
                             ItemsSource="{Binding ElementName=MyWindow, Path=SshKeys}"
                             SelectedValue="{Binding ElementName=MyWindow, Path=SelectedSshKey}"
-                          SelectionChanged="DropDown3_SelectionChanged">
+                          SelectionChanged="SshKey_SelectionChanged">
                 </ComboBox>
             </StackPanel>
             <StackPanel Margin="0,0,5,0">
                 <TextBlock Text="List Images:" Margin="0,0,0,5"/>
                 <ComboBox Name="ListImages" 
-                          Width="300" 
+                          Width="290" 
                           ItemsSource="{Binding ElementName=MyWindow, Path=Images}"
                           SelectedValue="{Binding ElementName=MyWindow, Path=SelectedImage}"
-                          SelectionChanged="DropDown3_SelectionChanged">
+                          SelectionChanged="ListImages_SelectionChanged">
                 </ComboBox>
             </StackPanel>
             <StackPanel Margin="0,0,5,0">
                 <TextBlock Text="Key For Lambda Lab:" Margin="0,0,0,5"/>
-                <TextBox Name="GitKey" Width="300"></TextBox>
+                <TextBox Name="GitKey" Text="{Binding ElementName=MyWindow, Path=PathToKey}" Width="600"></TextBox>
             </StackPanel>
             <StackPanel Margin="0,0,5,0">
                 <TextBlock Text="" Margin="0,0,0,5"/>
-                <Button Content="Select Key"></Button>
+                <Button Content="Select Key"
+                        Background="#1B3C53"
+                        Foreground="White"
+                        Click="SelectKey_Click"></Button>
             </StackPanel>
         </WrapPanel>
 
         <!-- Button section -->
         <WrapPanel Grid.Row="1" 
                     Orientation="Horizontal" 
-                    HorizontalAlignment="Center"
+                    HorizontalAlignment="Left"
                     Margin="0,0,0,20">
             <Button Name="StartButton"
                     Content="Start"
                     Width="100"
                     Height="35"
-                    Background="Green"
+                    Background="#1B3C53"
                     Foreground="White"
                     IsEnabled="{Binding ElementName=MyWindow, Path=IsNotRunning}"
                     Click="StartButton_Click" UseLayoutRounding="True"
                     Margin="0,0,10,0"
                     />
-            <Button Name="StopButton"
-                    Content="Stop"
-                    Width="100"
-                    Height="35"
-                    Background="Red"
-                    Foreground="White"
-                    IsEnabled="{Binding ElementName=MyWindow, Path=IsRunning}"
-                    Click="StopButton_Click" UseLayoutRounding="True"
-                    Margin="0,0,10,0"
-                    />
-            <Button Name="OpenButton"
-                    Content="Launch Ide"
-                    Width="100"
-                    Height="35"
-                    Background="Red"
-                    Foreground="White"
-                    IsEnabled="{Binding ElementName=MyWindow, Path=IsRunning}"
-                    Click="LaunchButton_Click" UseLayoutRounding="True" 
-                    Margin="0,0,10,0"
-                    />
         </WrapPanel>
-
+        
+        <ListBox Grid.Row="2" ItemsSource="{Binding ElementName=MyWindow, Path=RunningInstances}">
+            <ListBox.ItemTemplate>
+                <DataTemplate DataType="{x:Type Shared:Instance}">
+                    <StackPanel Orientation="Horizontal" Height="35" >
+                        <TextBlock TextAlignment="Center" Height="35" Text="{Binding}" Width="400" Margin="0,10,10,0"></TextBlock>
+                        <Button Content="Delete Instance"
+                                Width="150"
+                                Height="35"
+                                Background="#1B3C53"
+                                Foreground="White"
+                                Click="DeleteInstance_Click" UseLayoutRounding="True"
+                                DataContext="{Binding}"
+                                Margin="0,0,10,0"
+                                />
+                        <Button Content="Launch Jupyter"
+                                Width="150"
+                                Height="35"
+                                Background="#234C6A"
+                                Foreground="White"
+                                Click="LaunchButton_Click" UseLayoutRounding="True"
+                                DataContext="{Binding}"
+                                Margin="0,0,10,0"
+                        />
+                    </StackPanel>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+        
+        
         <!-- Graph section -->
-        <Border Grid.Row="2" 
+        <Border Grid.Row="3" 
                 BorderBrush="Gray" 
                 BorderThickness="1" 
                 CornerRadius="5">
@@ -118,10 +135,11 @@
                            FontWeight="Bold" 
                            HorizontalAlignment="Center"
                            Margin="0,0,0,10"></TextBlock>
-                <TextBlock Grid.Row="1" Grid.Column="0" Background="LightGray"
-                           Text="{Binding ElementName=MyWindow, Path=LogViewMessage}"
-                           Margin="1,1,1,1">
-                </TextBlock>
+                <Border Background="DarkGray" Grid.Row="1" Grid.Column="0" Margin="1,1,1,1">
+                    <ScrollViewer>
+                        <TextBlock Text="{Binding ElementName=MyWindow, Path=LogViewMessage}"></TextBlock>
+                    </ScrollViewer>
+                </Border>
                 <TextBlock Grid.Row="0"  Grid.Column="1"
                            Text="System Performance Graph" 
                            FontSize="16" 
@@ -130,7 +148,11 @@
                            Margin="0,0,0,10"/>
 
                 <!-- Simple graph representation using Canvas -->
-                <lvc:CartesianChart  Grid.Row="1" Grid.Column="1"></lvc:CartesianChart>
+                <lvc:CartesianChart Series="{Binding ElementName=MyWindow, Path=Series}"  Grid.Row="1" Grid.Column="1">
+                    <lvc:CartesianChart.XAxes>
+                        <lvc:XamlAxis Labels="{Binding DataType=lvc_core:ISeries, Path=Name}" />
+                    </lvc:CartesianChart.XAxes>
+                </lvc:CartesianChart>
             </Grid>
         </Border>
     </Grid>
