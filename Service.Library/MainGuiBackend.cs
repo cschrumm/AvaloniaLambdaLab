@@ -256,6 +256,35 @@ public class MainGuiBackend : INotifyPropertyChanged
         return rslt;
     }
 
+    public async Task<List<float>> GetInstanceData()
+    {
+        var tmp = new List<float>();
+        
+        // add token to header apikey
+        _httpClient.DefaultRequestHeaders.Add("apikey", _dataForApp.GuidToken);
+        foreach (var item in this.RunningInstances)
+        {
+            if(item.Status!="active") continue;
+            _api_url = $"https://{item.Ip}:7777/api/system";
+            var rslt = await _httpClient.GetFromJsonAsync<SystemStats>(_api_url);
+            if (rslt is null) continue;
+            var tt = 0.0f;
+            foreach (var gpu in rslt.GpuStats)
+            {
+               tt = tt + (float)gpu.UtilizationPercentage;
+            }
+               
+            tmp.Add(tt);
+           
+        }
+       
+        
+        
+        
+
+        return tmp;
+    }
+
     public async Task LoadLambdaData()
     {
         var intypes = this.InStanceTypes();

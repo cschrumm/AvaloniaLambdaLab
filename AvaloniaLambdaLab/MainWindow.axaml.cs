@@ -60,6 +60,8 @@ public class DataPoint
             InitializeData();
             _timer = new DispatcherTimer();
             _timer.Interval = TimeSpan.FromSeconds(3);
+            _timer.Tick += Timer_Tick;
+            _timer.Start();
             _backend.OnLogMessage += MonitorLog;
             _backend.OnInstanceLaunched += LaunchNotice;
             
@@ -168,6 +170,10 @@ public class DataPoint
         {
             // Update a UI element, for example, a TextBlock
             // MyTextBlock.Text = DateTime.Now.ToLongTimeString(); 
+            foreach (var i in RunningInstances)
+            {
+                
+            }
         }
 
         private void InitializeComponent()
@@ -240,12 +246,7 @@ public class DataPoint
                 return;
                 // throw;
             }
-            IsRunning = true;
-            _timer.Start();
-            
-            
-            // Add logic for what happens when starting
-            // For example, you might start a timer or begin data collection
+           
         }
 
         private void StopButton_Click(object sender, RoutedEventArgs e)
