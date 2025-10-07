@@ -200,8 +200,7 @@ public class DataPoint
             var to_remove = new List<Instance>();
             foreach (var i in RunningInstances)
             {
-                if (i.Status == "active")
-                {
+                
                     
                     Task.Run(async () =>
                     {
@@ -214,6 +213,9 @@ public class DataPoint
                         else
                         {
                             i.Status = ins.Status;
+
+                            if (i.Status != "active")
+                                return;
                             
                             var sts =await _backend.GetInstanceData(i);
 
@@ -221,11 +223,14 @@ public class DataPoint
                             {
                                 _chart_data.Add(i.Id,new  List<float>());
                             }
-                            
+
+                            if (sts is null)
+                                return;
                             var lst = _chart_data[i.Id];
 
                             var ttl =(float)sts.GpuStats.Sum(g => g.UtilizationPercentage) /
                                       (sts.GpuStats.Count == 0 ? 1 : sts.GpuStats.Count);
+                            //var tst = (float)(new Random()).NextDouble() * 100;
                             lst.Add(ttl);
                             if (lst.Count > 40)
                             {
@@ -241,7 +246,7 @@ public class DataPoint
                         
                     }).Wait();
                     
-                }
+                
             }
             foreach (var r in to_remove)
             {
