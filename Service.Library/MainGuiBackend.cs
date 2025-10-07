@@ -260,11 +260,12 @@ public class MainGuiBackend : INotifyPropertyChanged
     {
        
         // add token to header apikey
-
+        
         try
         {
-            _httpClient.DefaultRequestHeaders.Add("apikey", _dataForApp.GuidToken);
-            var asp_url = $"http://{instance.Ip}:7777/api/system";
+            if(!_httpClient.DefaultRequestHeaders.Contains("apikey"))
+                _httpClient.DefaultRequestHeaders.Add("apikey", _dataForApp.GuidToken);
+            var asp_url = $"http://{instance.Ip}:7777/api/SystemStats/system";
             var rslt = await _httpClient.GetFromJsonAsync<SystemStats>(asp_url);
             return rslt;
         }

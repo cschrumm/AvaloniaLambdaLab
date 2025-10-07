@@ -8,4 +8,7 @@ apikey: testkey
 GET {{WebApplication1_HostAddress}}/todos/1
 Accept: application/json
 
-###
+###      b6b09b71-7b84-4690-8e44-a055d1f2a87d
+
+GET http://192.222.50.233:7777/api/SystemStats/system
+apikey: b6b09b71-7b84-4690-8e44-a055d1f2a87d
