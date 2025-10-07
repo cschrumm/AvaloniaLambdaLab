@@ -1,12 +1,14 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:lvc="using:LiveChartsCore.SkiaSharpView.Avalonia"
+        xmlns:lvc_core="using:LiveChartsCore"
         xmlns:Shared="clr-namespace:Service.Library;assembly=Service.Library"
         x:Class="AvaloniaLambdaLab.MainWindow"
         Title="Lambda Cloud View"
         Width="800"
         Height="600"
         Unloaded="Unload_Window"
+        Loaded="OnLoaded"
         x:Name="MyWindow">
 
     <Grid Margin="20">
@@ -146,7 +148,11 @@
                            Margin="0,0,0,10"/>
 
                 <!-- Simple graph representation using Canvas -->
-                <lvc:CartesianChart  Grid.Row="1" Grid.Column="1"></lvc:CartesianChart>
+                <lvc:CartesianChart Series="{Binding ElementName=MyWindow, Path=Series}"  Grid.Row="1" Grid.Column="1">
+                    <lvc:CartesianChart.XAxes>
+                        <lvc:XamlAxis Labels="{Binding DataType=lvc_core:ISeries, Path=Name}" />
+                    </lvc:CartesianChart.XAxes>
+                </lvc:CartesianChart>
             </Grid>
         </Border>
     </Grid>

@@ -8,8 +8,11 @@ using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
+using Avalonia.Media.TextFormatting.Unicode;
 using Avalonia.Platform.Storage;
 using Avalonia.Threading;
+using LiveChartsCore;
+using LiveChartsCore.SkiaSharpView;
 using MsBox.Avalonia;
 using MsBox.Avalonia.Enums;
 using Service.Library;
@@ -29,6 +32,10 @@ public class DataPoint
         private ObservableCollection<DataPoint> _graphData;
         private DispatcherTimer _timer;
         private MainGuiBackend _backend = new MainGuiBackend();
+        
+        public ISeries[] Series { get; set; } = Array.Empty<ISeries>();
+        
+        private Dictionary<string, List<float>> _chart_data = new();
 
         
         // bound with the back ground ...
@@ -55,9 +62,15 @@ public class DataPoint
             /*
              *  
              */
-            InitializeComponent();
             DataContext = this;
+            InitializeComponent();
             InitializeData();
+            
+
+        }
+
+        private void OnLoaded(object sender, RoutedEventArgs e)
+        {
             _timer = new DispatcherTimer();
             _timer.Interval = TimeSpan.FromSeconds(3);
             _timer.Tick += Timer_Tick;
@@ -170,10 +183,73 @@ public class DataPoint
         {
             // Update a UI element, for example, a TextBlock
             // MyTextBlock.Text = DateTime.Now.ToLongTimeString(); 
+            List<ISeries> series = new List<ISeries>();
+
+            if (RunningInstances.Count == 0) return;
+            
+            
+            
+            var mss = _chart_data.Keys.Where(x => !RunningInstances.Any(i => i.Id == x)).ToList();
+
+            foreach (var ms in mss)
+            {
+                _chart_data.Remove(ms);
+                //_chart_data.Remove(ms.Key);
+            }
+
+            var to_remove = new List<Instance>();
             foreach (var i in RunningInstances)
             {
-                
+                if (i.Status == "active")
+                {
+                    
+                    Task.Run(async () =>
+                    {
+                        var ins = await _backend.GetInstance(i.Id);
+
+                        if (ins is null)
+                        {
+                            to_remove.Add(i);
+                        }
+                        else
+                        {
+                            i.Status = ins.Status;
+                            
+                            var sts =await _backend.GetInstanceData(i);
+
+                            if (!_chart_data.ContainsKey(i.Id))
+                            {
+                                _chart_data.Add(i.Id,new  List<float>());
+                            }
+                            
+                            var lst = _chart_data[i.Id];
+
+                            var ttl =(float)sts.GpuStats.Sum(g => g.UtilizationPercentage) /
+                                      (sts.GpuStats.Count == 0 ? 1 : sts.GpuStats.Count);
+                            lst.Add(ttl);
+                            if (lst.Count > 40)
+                            {
+                                lst.RemoveAt(0);
+                            }
+                            series.Add(new LineSeries<float>
+                            {
+                                Name = i.Name,
+                                Values = lst,
+                                Fill = null
+                            });
+                        }
+                        
+                    }).Wait();
+                    
+                }
             }
+            foreach (var r in to_remove)
+            {
+                RunningInstances.Remove(r);
+            }
+            this.Series = series.ToArray();
+            OnPropertyChanged(nameof(Series));
+            OnPropertyChanged(nameof(RunningInstances));
         }
 
         private void InitializeComponent()
