@@ -10,6 +10,8 @@ using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using Avalonia.Platform.Storage;
 using Avalonia.Threading;
+using MsBox.Avalonia;
+using MsBox.Avalonia.Enums;
 using Service.Library;
 using Image = Avalonia.Controls.Image;
 
@@ -256,7 +258,18 @@ public class DataPoint
         private void LaunchButton_Click(object sender, RoutedEventArgs e)
         {
             // Logic to launch an instance using selected parameters
-            _backend.LaunchBrowser();
+            //_backend.LaunchBrowser();
+            
+            var ins = sender as Button;
+            
+            if (ins != null && ins.DataContext is Instance)
+            {
+                var instance = ins.DataContext as Instance;
+                if (instance != null)
+                {
+                    _backend.LaunchBrowser(instance);
+                }
+            }
         }
 
         private void Machines_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -363,8 +376,23 @@ public class DataPoint
         private async void DeleteInstance_Click(object sender, RoutedEventArgs e)
         {
             // Logic to launch an instance using selected parameters
+            var ins = sender as Button;
+
+            if (ins != null && ins.DataContext is Instance)
+            {
+                _backend.DeleteServer(ins.DataContext as Instance);
+            }
             
+        }
+        
+        private async Task<bool> AskDelete(string name)
+        {
+            var msg = $"Are you sure you want to delete instance: {name}?";
             
+            var rslt =MessageBoxManager.GetMessageBoxStandard("Caption", "Are you sure you would like to delete appender_replace_page_1?",
+                    ButtonEnum.YesNo);
+            //rslt.
+            return false;
         }
         
         private void Unload_Window(object? sender, RoutedEventArgs e)
