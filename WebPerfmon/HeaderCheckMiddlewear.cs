@@ -15,7 +15,13 @@ public class HeaderCheckMiddleware
     {
         if (context.Request.Headers.TryGetValue("apikey", out var headerValue))
         {
-            var rslt = await _apiKeyValidationService.IsValidApiKeyAsync(headerValue[0]);
+            if(headerValue.Count==0)
+            {
+                context.Response.StatusCode = StatusCodes.Status400BadRequest;
+                await context.Response.WriteAsync("Missing required header.");
+                return;
+            }
+            var rslt = await _apiKeyValidationService.IsValidApiKeyAsync(headerValue[0]!);
 
             if (!rslt)
             {

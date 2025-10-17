@@ -25,9 +25,11 @@ public class SystemStatsController : ControllerBase
     {
         try
         {
+            // note we only get uptime on linux for now.
             var stats = new SystemStats
             {
                 Timestamp = DateTime.UtcNow,
+                Uptime = RuntimeInformation.IsOSPlatform(OSPlatform.Linux) ? UptimeParser.FetchUptime() : TimeSpan.Zero,
                 CpuUsage = await GetCpuUsageAsync(),
                 MemoryUsage = GetMemoryUsage(),
                 GpuStats = await GetGpuStatsAsync()

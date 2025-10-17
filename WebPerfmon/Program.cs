@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using WebApplication1;
 
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddSingleton<IApiKeyValidationService, ApiKeyValidationService>();
@@ -36,7 +37,7 @@ builder.Services.AddRateLimiter(options =>
 // locate token key
 
 
-builder.WebHost.UseUrls("http://0.0.0.0:7777");
+builder.WebHost.UseUrls("https://0.0.0.0:7777");
 
 
 
@@ -54,7 +55,7 @@ foreach (var arg in args)
     {
         Console.WriteLine($"Adding API Key: {arg}");
         var svr = app.Services.GetService<IApiKeyValidationService>();
-        svr.AddKey(arg);
+        svr!.AddKey(arg);
         lkey = false;
     }
     
@@ -69,7 +70,7 @@ foreach (var arg in args)
 if (System.Diagnostics.Debugger.IsAttached)
 {
     var svr = app.Services.GetService<IApiKeyValidationService>();
-    svr.AddKey("testkey");
+    svr!.AddKey("testkey");
     
     
 }

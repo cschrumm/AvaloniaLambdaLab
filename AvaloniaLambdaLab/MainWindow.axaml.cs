@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
@@ -25,13 +26,13 @@ public class DataPoint
     public double X { get; set; }
     public double Y { get; set; }
 }
-    public partial class MainWindow : Window, INotifyPropertyChanged
+    public partial class MainWindow : Window
     {
    
         private bool _isRunning = false;
-        private ObservableCollection<DataPoint> _graphData;
-        private DispatcherTimer _timer;
-        private MainGuiBackend _backend = new MainGuiBackend();
+        private ObservableCollection<DataPoint> _graphData = new();
+        private DispatcherTimer _timer = null!;
+        public MainGuiBackend GuiBackend { get; set; } = new MainGuiBackend();
         
         public ISeries[] Series { get; set; } = Array.Empty<ISeries>();
         
@@ -39,18 +40,10 @@ public class DataPoint
 
         
         // bound with the back ground ...
-        public ObservableCollection<InstanceNameDesc> Instances { get; set; } = new();
-        public ObservableCollection<Filesystem> Filesystems { get; set; } = new();
-        public ObservableCollection<SSHKey> SshKeys { get; set; } = new();
-        public ObservableCollection<Service.Library.Image> Images { get; set; } = new();
-        public InstanceNameDesc SelectedInstance { get; set; }
-        public Filesystem SelectedFilesystem { get; set; }
-        public SSHKey SelectedSshKey { get; set; }
-        public Service.Library.Image SelectedImage { get; set; }
-        
-        public ObservableCollection<Instance> RunningInstances { get; set; } = new();
-        
-        public string PathToKey { get; set; } = "";
+        /*
+       
+        */
+       // public string PathToKey { get; set; } = "";
         
         /* Log information to screen */
         public string LogViewMessage { get; set; } = "";
@@ -75,41 +68,21 @@ public class DataPoint
             _timer.Interval = TimeSpan.FromSeconds(3);
             _timer.Tick += Timer_Tick;
             _timer.Start();
-            _backend.OnLogMessage += MonitorLog;
-            _backend.OnInstanceLaunched += LaunchNotice;
+            GuiBackend.OnLogMessage += MonitorLog;
+            GuiBackend.OnInstanceLaunched += LaunchNotice;
             
-            _backend.PropertyChanged += Backend;
+            //GuiBackend.PropertyChanged += Backend;
             
             //_backend.LoadAllData();
             //LoadData();
-            _backend.Startup();
+            GuiBackend.Startup();
         }
 
-        private void Backend(object? sender, PropertyChangedEventArgs e)
-        {
-            try
-            {
-                var th = this.Instances;
-                if (Debugger.IsAttached)
-                {
-                    Console.WriteLine($"Backend Property Changed: {e.PropertyName}");
-                }
-                // backend copy to me...
-                this.SetPropertyValue(e.PropertyName, _backend);
-                
-                this.OnPropertyChanged(e.PropertyName);
-            }
-            catch (Exception exception)
-            {
-                Console.WriteLine(exception);
-                //throw;
-            }
-            
-        }
+        
         
         public void LaunchNotice(string msg)
         {
-            IsRunning = _backend.IsRunning;
+            IsRunning = GuiBackend.IsRunning;
             LogViewMessage += msg + "\n";
             this.CallChangeOnGui(nameof(IsRunning));
         }
@@ -118,6 +91,12 @@ public class DataPoint
         
         public void MonitorLog(string msg)
         {
+            
+            if("CLEAR" == msg)
+            {
+                ClearLog();
+                return;
+            }
             LogViewMessage += msg + "\n";
             this.CallChangeOnGui(nameof(LogViewMessage));
         }
@@ -132,64 +111,23 @@ public class DataPoint
         {
             Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(async () =>
             {
-                OnPropertyChanged(nm);
+                await Task.Delay(0);
+               
             });
         }
 
-        /*
-        private void LoadData()
-        {
-            Task.Run(async () =>
-            {
-                var intypes = _backend.InStanceTypes();
-                var filesys = _backend.ListFileSystems();
-                var keys = _backend.ListSshKeys();
-                var images = _backend.ListImages();
-                await Task.WhenAll(intypes, filesys, keys, images);
-                
-                Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(async () =>
-                {
-                    // UI operations here, e.g.,
-                    //myTextBlock.Text = "Updated from background thread.";
-                    foreach (var x in intypes.Result)
-                    {
-                        Instances.Add(x);
-                    }
-                    foreach (var x in filesys.Result)
-                    {
-                        Filesystems.Add(x);
-                    }
-                    
-                    foreach (var x in keys.Result)
-                    {
-                        SshKeys.Add(x);
-                    }
-                    foreach (var x in images.Result)
-                    {
-                        Images.Add(x);
-                    }
-                    
-                    OnPropertyChanged(nameof(Instances));
-                    OnPropertyChanged(nameof(Filesystems));
-                    OnPropertyChanged(nameof(Images));
-                });
-                
-
-            });
-        }
-        */
         
-        private void Timer_Tick(object sender, EventArgs e)
+        private void Timer_Tick(object? sender, EventArgs e)
         {
             // Update a UI element, for example, a TextBlock
             // MyTextBlock.Text = DateTime.Now.ToLongTimeString(); 
             List<ISeries> series = new List<ISeries>();
 
-            if (RunningInstances.Count == 0) return;
+            if (GuiBackend.RunningInstances.Count == 0) return;
             
             
             
-            var mss = _chart_data.Keys.Where(x => !RunningInstances.Any(i => i.Id == x)).ToList();
+            var mss = _chart_data.Keys.Where(x => !GuiBackend.RunningInstances.Any(i => i.Id == x)).ToList();
 
             foreach (var ms in mss)
             {
@@ -198,13 +136,13 @@ public class DataPoint
             }
 
             var to_remove = new List<Instance>();
-            foreach (var i in RunningInstances)
+            foreach (var i in GuiBackend.RunningInstances)
             {
                 
                     
                     Task.Run(async () =>
                     {
-                        var ins = await _backend.GetInstance(i.Id);
+                        var ins = await GuiBackend.GetInstance(i.Id);
 
                         if (ins is null)
                         {
@@ -217,7 +155,7 @@ public class DataPoint
                             if (i.Status != "active")
                                 return;
                             
-                            var sts =await _backend.GetInstanceData(i);
+                            var sts =await GuiBackend.GetInstanceData(i);
 
                             if (!_chart_data.ContainsKey(i.Id))
                             {
@@ -250,11 +188,10 @@ public class DataPoint
             }
             foreach (var r in to_remove)
             {
-                RunningInstances.Remove(r);
+               GuiBackend.RunningInstances.Remove(r);
             }
             this.Series = series.ToArray();
-            OnPropertyChanged(nameof(Series));
-            OnPropertyChanged(nameof(RunningInstances));
+            
         }
 
         private void InitializeComponent()
@@ -270,8 +207,7 @@ public class DataPoint
                 if (_isRunning != value)
                 {
                     _isRunning = value;
-                    OnPropertyChanged(nameof(IsRunning));
-                    OnPropertyChanged(nameof(IsNotRunning));
+                    
                 }
             }
         }
@@ -284,13 +220,15 @@ public class DataPoint
             set
             {
                 _graphData = value;
-                OnPropertyChanged(nameof(GraphData));
+               
             }
         }
 
         public async void SelectFile()
         {
             var topLevel = TopLevel.GetTopLevel(this);
+            
+            if(topLevel is null) return;
 
             // Start async operation to open the dialog.
             var files = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
@@ -298,6 +236,26 @@ public class DataPoint
                 Title = "Open Text File",
                 AllowMultiple = false
             });
+        }
+
+        private async Task<string> FindDirectory()
+        {
+            var topLevel = TopLevel.GetTopLevel(this);
+            
+            if(topLevel is null) return "";
+            
+            var drs = await topLevel.StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
+            {
+                Title = "Select Folder",
+                AllowMultiple = false
+            });
+            
+            var drlist = drs.ToList();
+            if (drlist.Count > 0)
+            {
+                return drlist[0].Path.LocalPath;
+            }
+            return String.Empty;
         }
 
         private void InitializeData()
@@ -317,7 +275,7 @@ public class DataPoint
         {
             try
             {
-                await _backend.StartInstance();
+                await GuiBackend.StartInstance();
             }
             catch (Exception exception)
             {
@@ -349,7 +307,29 @@ public class DataPoint
                 var instance = ins.DataContext as Instance;
                 if (instance != null)
                 {
-                    _backend.LaunchBrowser(instance);
+                    GuiBackend.LaunchBrowser(instance);
+                }
+            }
+        }
+        
+        private async void CopyToServerButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Logic to launch an instance using selected parameters
+            //_backend.LaunchBrowser();
+            
+            var ins = sender as Button;
+            
+            if (ins != null && ins.DataContext is Instance)
+            {
+                var instance = ins.DataContext as Instance;
+                if (instance != null)
+                {
+                    var fldr = await FindDirectory();
+                    if (!string.IsNullOrEmpty(fldr))
+                    {
+                        GuiBackend.ZipAndUpload(fldr, instance);
+                    }
+                    //GuiBackend.CopyToServer(instance);
                 }
             }
         }
@@ -363,18 +343,8 @@ public class DataPoint
                 var selected = combo.SelectedItem as InstanceNameDesc;
                 if (selected != null)
                 {
-                    var imgs = _backend.CompantibleImages(selected);
-                    this.Images = new ObservableCollection<Service.Library.Image>(imgs);
-
                     
-                    OnPropertyChanged(nameof(Images));
-
-                    if (this.Images.Count > 0)
-                    {
-                        this.SelectedImage = this.Images[^1];
-                        OnPropertyChanged(nameof(SelectedImage));
-                    }
-
+                    GuiBackend.MakeImageSelection(selected);
 
                 }
                 // Add your logic here
@@ -395,6 +365,9 @@ public class DataPoint
         private async Task<string> PickFile()
         {
             var topLevel = TopLevel.GetTopLevel(this);
+            
+            if(topLevel is null) return "";
+            
             string path = "";
             // Start async operation to open the dialog.
             var filesTask = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
@@ -422,15 +395,16 @@ public class DataPoint
             {
                Console.WriteLine("Selected Path: " + path);
             }
+
+            GuiBackend.setKeyPath(path);
             
-            _backend.PathToKey = path;
-            this.PathToKey = path;
-            OnPropertyChanged(nameof(PathToKey));
+            
         }
         
         private async void OnUnload_Window(object? sender, RoutedEventArgs e)
         {
-             _backend.Shutdown();
+             await Task.Delay(0);
+             GuiBackend.Shutdown();
         }
 
         private void SshKey_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -459,16 +433,17 @@ public class DataPoint
         {
             // Logic to launch an instance using selected parameters
             var ins = sender as Button;
-
-            if (ins != null && ins.DataContext is Instance)
+            await Task.Delay(0);
+            if (ins != null && ins.DataContext is not null && ins.DataContext is Instance)
             {
-                _backend.DeleteServer(ins.DataContext as Instance);
+                await GuiBackend.DeleteServer((ins.DataContext as Instance)!);
             }
             
         }
         
         private async Task<bool> AskDelete(string name)
         {
+            await Task.Delay(0);
             var msg = $"Are you sure you want to delete instance: {name}?";
             
             var rslt =MessageBoxManager.GetMessageBoxStandard("Caption", "Are you sure you would like to delete appender_replace_page_1?",
@@ -480,24 +455,21 @@ public class DataPoint
         private void Unload_Window(object? sender, RoutedEventArgs e)
         {
             // copy back to backend
-            Utils.CopyProperties(this, _backend);
-            _backend.Shutdown();
+            //Utils.CopyProperties(this, GuiBackend);
+            GuiBackend.Shutdown();
         }
         
         
-        public event PropertyChangedEventHandler PropertyChanged;
+       
 
         private void CallOnGui(Action action)
         {
             Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(async () =>
             {
                 //LogViewMessage += s + "\n";
+                await Task.Delay(0);
                 action();
-                
             });
         }
-        protected virtual void OnPropertyChanged(string propertyName)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
+       
     }
