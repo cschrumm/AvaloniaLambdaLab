@@ -1,0 +1,15 @@
+sequenceDiagram
+  participant AvaloniaLambdaLab as AvaloniaLambdaLab
+  participant LambdaLabCloud as LambdaLabCloud
+  participant NewInstance as NewInstance
+  participant Github as Github
+  AvaloniaLambdaLab ->> LambdaLabCloud: Can you spawn an instance with these requirements and this ssh key?
+  LambdaLabCloud --> NewInstance: Born! 
+  LambdaLabCloud ->> AvaloniaLambdaLab: Done! Please wait till instance if completed booting.
+  AvaloniaLambdaLab ->> NewInstance: (over ssh) Please run these commands..
+  NewInstance ->> Github: git clone repo
+  Github ->> NewInstance: returns code for whole repo
+  AvaloniaLambdaLab ->> NewInstance: Build WebPerf and Spawn
+  AvaloniaLambdaLab ->> NewInstance: (over https) get preformance data from installed service
+  AvaloniaLambdaLab ->> LambdaLabCloud: Kills the instance when we are finished with it.
+  LambdaLabCloud --> NewInstance: Dies!

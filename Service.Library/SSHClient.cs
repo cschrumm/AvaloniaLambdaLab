@@ -157,7 +157,8 @@ public class SshClientManager
             {
                 using (var fileStream = new FileStream(localPath, FileMode.Open))
                 {
-                    _sftpClient.BufferSize = 4 * 1024; // 4KB buffer
+                    // change to 100mb
+                    _sftpClient.BufferSize = 100_000_00; // 4KB buffer
                     _sftpClient.UploadFile(fileStream, remotePath);
                 }
                 

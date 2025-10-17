@@ -15,6 +15,8 @@ internal partial class AppJsonSerializerContext : JsonSerializerContext
 public class SystemStats
 {
     public DateTime Timestamp { get; set; }
+    
+    public TimeSpan Uptime { get; set; }
     public CpuStats CpuUsage { get; set; } = new();
     public MemoryStats MemoryUsage { get; set; } = new();
     public List<GpuStats> GpuStats { get; set; } = new();

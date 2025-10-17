@@ -94,8 +94,7 @@ public class InstanceType
     [JsonPropertyName("price_cents_per_hour")]
     public int PriceCentsPerHour { get; set; }
 
-    [JsonPropertyName("specs")]
-    public InstanceTypeSpecs Specs { get; set; }
+    [JsonPropertyName("specs")] public InstanceTypeSpecs Specs { get; set; } = new();
 }
 
 public class InstanceTypeSpecs
@@ -293,17 +292,16 @@ public class FirewallRuleset
     [JsonPropertyName("name")]
     public string Name { get; set; } = String.Empty;
 
-    [JsonPropertyName("region")]
-    public Region Region { get; set; }
+    [JsonPropertyName("region")] public Region Region { get; set; } = new();
 
     [JsonPropertyName("rules")]
-    public List<FirewallRule> Rules { get; set; }
+    public List<FirewallRule> Rules { get; set; } = new();
 
     [JsonPropertyName("created")]
     public DateTime Created { get; set; }
 
     [JsonPropertyName("instance_ids")]
-    public List<string> InstanceIds { get; set; }
+    public List<string> InstanceIds { get; set; } = new();
 }
 
 public class ImageId
@@ -399,13 +397,13 @@ public class FilesystemCreateRequest
 public class ApiResponse<T>
 {
     [JsonPropertyName("data")]
-    public T Data { get; set; }
+    public T Data { get; set; } = default!;
 }
 
 public class ApiError
 {
     [JsonPropertyName("error")]
-    public ErrorDetails Error { get; set; }
+    public ErrorDetails Error { get; set; } = new();
 }
 
 public class ErrorDetails
@@ -423,43 +421,44 @@ public class ErrorDetails
 public class InstanceLaunchResponse
 {
     [JsonPropertyName("instance_ids")]
-    public List<string> InstanceIds { get; set; }
+    public List<string> InstanceIds { get; set; } = new();
 }
 
 public class InstanceRestartResponse
 {
     [JsonPropertyName("restarted_instances")]
-    public List<Instance> RestartedInstances { get; set; }
+    public List<Instance> RestartedInstances { get; set; } = new();
 }
 
 public class InstanceTerminateResponse
 {
     [JsonPropertyName("terminated_instances")]
-    public List<Instance> TerminatedInstances { get; set; }
+    public List<Instance> TerminatedInstances { get; set; } = new();
 }
 
 // Custom Exceptions
 public class LambdaCloudApiException : Exception
 {
-    public string Code { get; }
-    public string Suggestion { get; }
+    public string Code { get; } = String.Empty;
+    public string Suggestion { get; } = String.Empty;
 
-    public LambdaCloudApiException(string code, string message, string suggestion = null) 
+    public LambdaCloudApiException(string code, string message, string suggestion = null!) 
         : base(message)
     {
         Code = code;
-        Suggestion = suggestion;
+        Suggestion = suggestion ?? string.Empty;
     }
 }
 
 // Main API Client
+// Handle async throws error if not 200 so we need not worry about body parse errors so much.
 public class LambdaCloudClient : IDisposable
 {
     private readonly HttpClient _httpClient;
     private readonly JsonSerializerOptions _jsonOptions;
     private const string BaseUrl = "https://cloud.lambda.ai/api/v1";
 
-    public LambdaCloudClient(string apiKey, HttpClient httpClient = null)
+    public LambdaCloudClient(string apiKey, HttpClient httpClient = null!)
     {
         _httpClient = httpClient ?? new HttpClient();
         _httpClient.BaseAddress = new Uri(BaseUrl);
@@ -489,7 +488,7 @@ public class LambdaCloudClient : IDisposable
     }
 
     // Instance Methods
-    public async Task<List<Instance>> ListInstancesAsync(string clusterId = null)
+    public async Task<List<Instance>> ListInstancesAsync(string clusterId = null!)
     {
         var url = "/instances";
         if (!string.IsNullOrEmpty(clusterId))
@@ -599,11 +598,11 @@ public class LambdaCloudClient : IDisposable
         return await GetAsync<FirewallRuleset>($"/firewall-rulesets/{rulesetId}");
     }
 
-    public async Task<FirewallRuleset> UpdateFirewallRulesetAsync(string rulesetId, string name = null, List<FirewallRule> rules = null)
+    public async Task<FirewallRuleset> UpdateFirewallRulesetAsync(string rulesetId, string name = null!, List<FirewallRule> rules = null!)
     {
         var request = new Dictionary<string, object>();
-        if (name != null) request["name"] = name;
-        if (rules != null) request["rules"] = rules;
+        if (name is not null) request["name"] = name;
+        if (rules is not null) request["rules"] = rules;
 
         return await PatchAsync<FirewallRuleset>($"/firewall-rulesets/{rulesetId}", request);
     }
@@ -630,7 +629,7 @@ public class LambdaCloudClient : IDisposable
         var content = new StringContent(json, Encoding.UTF8, "application/json");
         // Claude Foo
         var response = await _httpClient.PostAsync(BaseUrl + endpoint, content);
-        return await HandleResponseAsync<T>(response);
+        return await HandleResponseAsync<T>(response)!;
     }
 
     private async Task<T> PutAsync<T>(string endpoint, object data)
@@ -639,7 +638,7 @@ public class LambdaCloudClient : IDisposable
         var content = new StringContent(json, Encoding.UTF8, "application/json");
         // Claude Foo
         var response = await _httpClient.PutAsync(BaseUrl + endpoint, content);
-        return await HandleResponseAsync<T>(response);
+        return await HandleResponseAsync<T>(response)!;
     }
 
     private async Task<T> PatchAsync<T>(string endpoint, object data)
@@ -649,13 +648,13 @@ public class LambdaCloudClient : IDisposable
         // Claude Foo
         var request = new HttpRequestMessage(HttpMethod.Patch, BaseUrl + endpoint) { Content = content };
         var response = await _httpClient.SendAsync(request);
-        return await HandleResponseAsync<T>(response);
+        return await HandleResponseAsync<T>(response)!;
     }
 
     private async Task DeleteAsync(string endpoint)
     {
         var response = await _httpClient.DeleteAsync(endpoint);
-        await HandleResponseAsync<object>(response);
+        await HandleResponseAsync<object>(response)!;
     }
 
     private async Task<T> HandleResponseAsync<T>(HttpResponseMessage response)
@@ -668,7 +667,7 @@ public class LambdaCloudClient : IDisposable
                 return default(T)!;
 
             var apiResponse = JsonSerializer.Deserialize<ApiResponse<T>>(content, _jsonOptions);
-            return apiResponse.Data;
+            return apiResponse!.Data;
         }
         else
         {
@@ -676,9 +675,9 @@ public class LambdaCloudClient : IDisposable
             {
                 var errorResponse = JsonSerializer.Deserialize<ApiError>(content, _jsonOptions);
                 throw new LambdaCloudApiException(
-                    errorResponse.Error.Code,
-                    errorResponse.Error.Message,
-                    errorResponse.Error.Suggestion
+                    errorResponse?.Error?.Code ?? "unknown_error",
+                    errorResponse?.Error?.Message ?? $"HTTP {(int)response.StatusCode}: {response.ReasonPhrase}",
+                    errorResponse?.Error?.Suggestion ?? String.Empty
                 );
             }
             catch (JsonException)
