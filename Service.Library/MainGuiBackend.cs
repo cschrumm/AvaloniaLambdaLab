@@ -74,11 +74,18 @@ public class MainGuiBackend : INotifyPropertyChanged
     
     public string PathToKey { get; set; } = "";
     
+    public string LogViewMessage { get; set; } = "";
+    
     public bool IsRunning { get; private set; }
     public MainGuiBackend()
     {
+        
+        OnLogMessage += MonitorLog;
+        
         var apiKey = SecretManage.GetLambdaKey(); // System.Environment.GetEnvironmentVariable("LAMBDA_KEY"); // Load from secure storage or environment variable
         _httpClient = new HttpClient();
+        
+        
         
         if (apiKey is null || apiKey == String.Empty)
         {
@@ -181,7 +188,52 @@ public class MainGuiBackend : INotifyPropertyChanged
         //File.WriteAllText(app_file, json);
         await File.WriteAllTextAsync(app_file, json);
     }
+
+
+    public void InstallRepo(Repository repo, Instance instance, string kypath)
+    {
+        var sshManager = new SshClientManager();
+        var git_hub_key = SecretManage.GetGitHubToken(); // System.Environment.GetEnvironmentVariable
+        var cmd_ln = $"gh auth login --with-token <<< \"{git_hub_key}\" && gh repo clone {repo.Full_Name}";
+        
+        OnInstanceLaunched?.Invoke("CLEAR");
+
+        try
+        {
+            sshManager.ConnectWithPrivateKey(instance.Ip, 22, "ubuntu", kypath);
+            OnLogMessage?.Invoke($"Cloning Repo: {git_hub_key}");
+            OnLogMessage?.Invoke(cmd_ln);
+            var rslt =sshManager.ExecuteCommand(cmd_ln);
+            OnLogMessage?.Invoke(rslt);
+        }
+        finally
+        {
+            sshManager.Disconnect();
+        }
+        
+        
+    }
     
+    public void MonitorLog(string msg)
+    {
+            
+        if("CLEAR" == msg)
+        {
+            ClearLog();
+            return;
+        }
+        LogViewMessage += msg + "\n";
+        OnPropertyChanged(nameof(LogViewMessage));
+        //OnLogMessage?.Invoke(LogViewMessage);
+        //this.CallChangeOnGui(nameof(LogViewMessage));
+    }
+        
+    private void ClearLog()
+    {
+        LogViewMessage = "";
+        OnPropertyChanged(nameof(LogViewMessage));
+        //this.CallChangeOnGui(nameof(LogViewMessage));
+    }
 
     public void Startup()
     {
@@ -421,9 +473,11 @@ public class MainGuiBackend : INotifyPropertyChanged
         var cntr = RunningInstances.Count + 1;
         var instName = $"{SelectedInstance.Name}-{cntr}";
         OnLogMessage?.Invoke($"Staring..");
+        
+        var flsys_name = (SelectedFilesystem is null || SelectedFilesystem?.Name == "") ? null : SelectedFilesystem?.Name;
+        
         var insts = await CreateServer(instName, SelectedInstance.IntType.InstanceType.Name,
-            SelectedInstance.Region.Name, SelectedSshKey.Name, SelectedImage.Id,
-            SelectedFilesystem?.Name);
+            SelectedInstance.Region.Name, SelectedSshKey.Name, SelectedImage.Id, flsys_name);
         
         if (insts is null || !insts.Any()) throw new Exception("Failed to create instance");
         OnLogMessage?.Invoke($"Waiting for setup");
@@ -500,10 +554,16 @@ public class MainGuiBackend : INotifyPropertyChanged
     {
         var sshManager = new SshClientManager();
 
-        sshManager.ConnectWithPrivateKey(instance.Ip, 22, "ubuntu", kypath);
-        
-
-        await this.SetupRemoteServer(sshManager, token);
+        try
+        {
+             sshManager.ConnectWithPrivateKey(instance.Ip, 22, "ubuntu", kypath);
+            
+            await this.SetupRemoteServer(sshManager, token);
+        }
+        finally
+        {
+            sshManager.Disconnect();
+        }
 
     }
 
@@ -511,24 +571,30 @@ public class MainGuiBackend : INotifyPropertyChanged
     public void ZipAndUpload(string path, Instance instance)
     {
         var sshManager = new SshClientManager();
+        try
+        {
+            sshManager.ConnectWithPrivateKey(instance.Ip, 22, "ubuntu", PathToKey);
+            sshManager.StartSftpSession();
 
-        sshManager.StartSftpSession();
-        sshManager.ConnectWithPrivateKey(instance.Ip, 22, "ubuntu", PathToKey);
-        
-        var nw = new DirectoryInfo(path);
-        // get tempary directory
-        
-        OnLogMessage?.Invoke("CLEAR");
-        OnLogMessage?.Invoke($"Uploading {nw.FullName} zipping..");
-        var tmp_dir = Path.Combine(Path.GetTempPath(),"tmp_repo.zip");
-        if(File.Exists(tmp_dir)) File.Delete(tmp_dir);
-        
-        System.IO.Compression.ZipFile.CreateFromDirectory(path, tmp_dir);
-        OnLogMessage?.Invoke($"Zipped {nw.Name} sending...");
-        sshManager.UploadFile(tmp_dir, nw.Name + ".zip");
-        OnLogMessage?.Invoke($"Upload complete unzipping on server...");
-        sshManager.ExecuteCommand($"unzip -o {nw.Name}.zip -d {nw.Name}");
-        
+            var nw = new DirectoryInfo(path);
+            // get tempary directory
+
+            OnLogMessage?.Invoke("CLEAR");
+            OnLogMessage?.Invoke($"Uploading {nw.FullName} zipping..");
+            var tmp_dir = Path.Combine(Path.GetTempPath(), "tmp_repo.zip");
+            if (File.Exists(tmp_dir)) File.Delete(tmp_dir);
+
+            System.IO.Compression.ZipFile.CreateFromDirectory(path, tmp_dir);
+            OnLogMessage?.Invoke($"Zipped {nw.Name} sending...");
+            sshManager.UploadFile(tmp_dir, nw.Name + ".zip");
+            OnLogMessage?.Invoke($"Upload complete unzipping on server...");
+            var rslt = sshManager.ExecuteCommand($"unzip -o {nw.Name}.zip -d {nw.Name}");
+            OnLogMessage?.Invoke(rslt);
+        }
+        finally
+        {
+            sshManager.Disconnect();
+        }
     }
     
     public async Task<Instance> GetInstance(string instanceId)
