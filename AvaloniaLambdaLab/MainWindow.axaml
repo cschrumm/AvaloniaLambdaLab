@@ -112,6 +112,10 @@
                                 Margin="0,0,10,0"
                         />
                         <Button Content="Copy Directory" 
+                                Width="150"
+                                Height="35"
+                                Background="#234C6A"
+                                Foreground="White"
                                 DataContext="{Binding}" 
                                 Click="CopyToServerButton_Click"
                                 Margin="0,0,10,0"></Button>
@@ -142,7 +146,7 @@
                            Margin="0,0,0,10"></TextBlock>
                 <Border Background="DarkGray" Grid.Row="1" Grid.Column="0" Margin="1,1,1,1">
                     <ScrollViewer>
-                        <TextBlock Text="{Binding ElementName=MyWindow, Path=LogViewMessage}"></TextBlock>
+                        <TextBlock Text="{Binding #MyWindow.GuiBackend.LogViewMessage}"></TextBlock>
                     </ScrollViewer>
                 </Border>
                 <TextBlock Grid.Row="0"  Grid.Column="1"

@@ -46,7 +46,7 @@ public class DataPoint
        // public string PathToKey { get; set; } = "";
         
         /* Log information to screen */
-        public string LogViewMessage { get; set; } = "";
+        
         
         
 
@@ -68,8 +68,8 @@ public class DataPoint
             _timer.Interval = TimeSpan.FromSeconds(3);
             _timer.Tick += Timer_Tick;
             _timer.Start();
-            GuiBackend.OnLogMessage += MonitorLog;
-            GuiBackend.OnInstanceLaunched += LaunchNotice;
+            //GuiBackend.OnLogMessage += MonitorLog;
+            //GuiBackend.OnInstanceLaunched += LaunchNotice;
             
             //GuiBackend.PropertyChanged += Backend;
             
@@ -80,38 +80,26 @@ public class DataPoint
 
         
         
+        /*
         public void LaunchNotice(string msg)
         {
             IsRunning = GuiBackend.IsRunning;
             LogViewMessage += msg + "\n";
             this.CallChangeOnGui(nameof(IsRunning));
         }
+        */
         
         
         
-        public void MonitorLog(string msg)
-        {
-            
-            if("CLEAR" == msg)
-            {
-                ClearLog();
-                return;
-            }
-            LogViewMessage += msg + "\n";
-            this.CallChangeOnGui(nameof(LogViewMessage));
-        }
         
-        private void ClearLog()
-        {
-            LogViewMessage = "";
-            this.CallChangeOnGui(nameof(LogViewMessage));
-        }
 
         private void CallChangeOnGui(string nm)
         {
             Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(async () =>
             {
                 await Task.Delay(0);
+                
+                
                
             });
         }
@@ -277,11 +265,13 @@ public class DataPoint
             {
                 await GuiBackend.StartInstance();
             }
-            catch (Exception exception)
+            catch (Exception ex)
             {
                 //Console.WriteLine(exception);
-                LogViewMessage += "ERROR STARTING: " + exception.Message + "\n";
-                this.CallChangeOnGui(nameof(LogViewMessage));
+                GuiBackend.LogViewMessage += "ERROR STARTING INSTANCE\n" + ex.Message + "\n";
+                //this.CallChangeOnGui(nameof(LogViewM
+                //LogViewMessage += "ERROR STARTING: " + exception.Message + "\n";
+                //this.CallChangeOnGui(nameof(LogViewMessage));
                 return;
                 // throw;
             }
