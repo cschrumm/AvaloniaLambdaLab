@@ -1,6 +1,7 @@
 using Service.Library;
 
 namespace WebApplication1;
+
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using System.Text.Json;
@@ -12,14 +13,10 @@ using System.IO;
 [Route("api/[controller]")]
 public class SystemStatsController : ControllerBase
 {
- 
-
     public SystemStatsController()
     {
-       
-        
-        
     }
+
     [HttpGet("system")]
     public async Task<ActionResult<SystemStats>> GetSystemStats()
     {
@@ -46,7 +43,6 @@ public class SystemStatsController : ControllerBase
     [HttpGet("cpu")]
     public async Task<ActionResult<CpuStats>> GetCpuStats()
     {
-        
         try
         {
             var cpuStats = await GetCpuUsageAsync();
@@ -61,7 +57,6 @@ public class SystemStatsController : ControllerBase
     [HttpGet("memory")]
     public async Task<ActionResult<MemoryStats>> GetMemoryStats()
     {
-     
         try
         {
             var memoryStats = GetMemoryUsage();
@@ -76,7 +71,6 @@ public class SystemStatsController : ControllerBase
     [HttpGet("gpu")]
     public async Task<ActionResult<List<GpuStats>>> GetGpuStats()
     {
-     
         try
         {
             var gpuStats = await GetGpuStatsAsync();
@@ -87,12 +81,12 @@ public class SystemStatsController : ControllerBase
             return StatusCode(500, new { error = ex.Message });
         }
     }
- 
+
 
     private async Task<CpuStats> GetCpuUsageAsync()
     {
         double cpuUsage = 0;
-        
+
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
             cpuUsage = await GetWindowsCpuUsageAsync();
@@ -121,13 +115,13 @@ public class SystemStatsController : ControllerBase
             // Use WMI for Windows
             using var searcher = new ManagementObjectSearcher("SELECT LoadPercentage FROM Win32_Processor");
             var cpuUsages = new List<double>();
-            
+
             foreach (ManagementObject obj in searcher.Get())
             {
                 var usage = Convert.ToDouble(obj["LoadPercentage"]);
                 cpuUsages.Add(usage);
             }
-            
+
             return cpuUsages.Any() ? cpuUsages.Average() : 0;
         }
         catch
@@ -143,16 +137,16 @@ public class SystemStatsController : ControllerBase
         {
             var startTime = DateTime.UtcNow;
             var startCpuUsage = await ReadLinuxCpuUsageAsync();
-            
+
             await Task.Delay(1000); // Wait 1 second
-            
+
             var endTime = DateTime.UtcNow;
             var endCpuUsage = await ReadLinuxCpuUsageAsync();
-            
+
             var cpuUsedMs = (endCpuUsage - startCpuUsage) / 1000; // Convert to milliseconds
             var totalTimeMs = (endTime - startTime).TotalMilliseconds;
             var cpuUsagePercentage = (cpuUsedMs / (Environment.ProcessorCount * totalTimeMs)) * 100;
-            
+
             return Math.Max(0, Math.Min(100, cpuUsagePercentage));
         }
         catch
@@ -168,7 +162,7 @@ public class SystemStatsController : ControllerBase
             var stat = await System.IO.File.ReadAllTextAsync("/proc/stat");
             var line = stat.Split('\n')[0]; // First line contains overall CPU stats
             var values = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-            
+
             if (values.Length > 4)
             {
                 // user + nice + system + idle + iowait + irq + softirq
@@ -178,11 +172,14 @@ public class SystemStatsController : ControllerBase
                     if (long.TryParse(values[i], out var val))
                         totalTime += val;
                 }
+
                 return totalTime;
             }
         }
-        catch { }
-        
+        catch
+        {
+        }
+
         return 0;
     }
 
@@ -211,7 +208,7 @@ public class SystemStatsController : ControllerBase
                     var parts = line.Split(',');
                     var userPart = parts[0].Replace("CPU usage:", "").Replace("%", "").Replace("user", "").Trim();
                     var sysPart = parts[1].Replace("%", "").Replace("sys", "").Trim();
-                    
+
                     if (double.TryParse(userPart, out var user) && double.TryParse(sysPart, out var sys))
                     {
                         return user + sys;
@@ -219,7 +216,9 @@ public class SystemStatsController : ControllerBase
                 }
             }
         }
-        catch { }
+        catch
+        {
+        }
 
         return await GetProcessBasedCpuUsageAsync();
     }
@@ -228,16 +227,16 @@ public class SystemStatsController : ControllerBase
     {
         var startTime = DateTime.UtcNow;
         var startCpuUsage = Process.GetCurrentProcess().TotalProcessorTime;
-        
+
         await Task.Delay(500);
-        
+
         var endTime = DateTime.UtcNow;
         var endCpuUsage = Process.GetCurrentProcess().TotalProcessorTime;
-        
+
         var cpuUsedMs = (endCpuUsage - startCpuUsage).TotalMilliseconds;
         var totalMsPassed = (endTime - startTime).TotalMilliseconds;
         var cpuUsageTotal = cpuUsedMs / (Environment.ProcessorCount * totalMsPassed);
-        
+
         return cpuUsageTotal * 100;
     }
 
@@ -253,13 +252,17 @@ public class SystemStatsController : ControllerBase
 
         // Try to get system-wide memory info
         var systemMemory = GetSystemMemoryInfo();
-        
+
         return new MemoryStats
         {
             TotalMemoryMB = Math.Round(systemMemory.TotalMB > 0 ? systemMemory.TotalMB : totalMemoryMB, 2),
             AvailableMemoryMB = Math.Round(systemMemory.AvailableMB, 2),
             UsedMemoryMB = Math.Round(systemMemory.TotalMB - systemMemory.AvailableMB, 2),
-            UsagePercentage = Math.Round(systemMemory.TotalMB > 0 ? ((systemMemory.TotalMB - systemMemory.AvailableMB) / systemMemory.TotalMB) * 100 : 0, 2),
+            UsagePercentage =
+                Math.Round(
+                    systemMemory.TotalMB > 0
+                        ? ((systemMemory.TotalMB - systemMemory.AvailableMB) / systemMemory.TotalMB) * 100
+                        : 0, 2),
             ProcessWorkingSetMB = Math.Round(workingSetMB, 2)
         };
     }
@@ -281,7 +284,9 @@ public class SystemStatsController : ControllerBase
                 return GetMacOsMemoryInfo();
             }
         }
-        catch { }
+        catch
+        {
+        }
 
         return (0, 0);
     }
@@ -290,7 +295,9 @@ public class SystemStatsController : ControllerBase
     {
         try
         {
-            using var searcher = new ManagementObjectSearcher("SELECT TotalVisibleMemorySize, AvailablePhysicalMemory FROM Win32_OperatingSystem");
+            using var searcher =
+                new ManagementObjectSearcher(
+                    "SELECT TotalVisibleMemorySize, AvailablePhysicalMemory FROM Win32_OperatingSystem");
             foreach (ManagementObject obj in searcher.Get())
             {
                 var totalKB = Convert.ToDouble(obj["TotalVisibleMemorySize"]);
@@ -298,7 +305,9 @@ public class SystemStatsController : ControllerBase
                 return (totalKB / 1024, availableKB / 1024);
             }
         }
-        catch { }
+        catch
+        {
+        }
 
         return (0, 0);
     }
@@ -309,9 +318,9 @@ public class SystemStatsController : ControllerBase
         {
             var memInfo = System.IO.File.ReadAllText("/proc/meminfo");
             var lines = memInfo.Split('\n');
-            
+
             double totalKB = 0, availableKB = 0, freeKB = 0, buffersKB = 0, cachedKB = 0;
-            
+
             foreach (var line in lines)
             {
                 if (line.StartsWith("MemTotal:"))
@@ -325,14 +334,16 @@ public class SystemStatsController : ControllerBase
                 else if (line.StartsWith("Cached:"))
                     double.TryParse(line.Split()[1], out cachedKB);
             }
-            
+
             // If MemAvailable is not available, estimate it
             if (availableKB == 0)
                 availableKB = freeKB + buffersKB + cachedKB;
-            
+
             return (totalKB / 1024, availableKB / 1024);
         }
-        catch { }
+        catch
+        {
+        }
 
         return (0, 0);
     }
@@ -355,7 +366,9 @@ public class SystemStatsController : ControllerBase
             // This is a simplified version - you might want to enhance this
             return (0, 0); // Placeholder - implement proper parsing
         }
-        catch { }
+        catch
+        {
+        }
 
         return (0, 0);
     }
@@ -363,22 +376,23 @@ public class SystemStatsController : ControllerBase
     private async Task<List<GpuStats>> GetGpuStatsAsync()
     {
         var gpuStatsList = new List<GpuStats>();
-        
+
         try
         {
             using var process = new Process();
             process.StartInfo.FileName = "nvidia-smi";
-            process.StartInfo.Arguments = "--query-gpu=index,name,temperature.gpu,utilization.gpu,utilization.memory,memory.total,memory.used,memory.free,power.draw,power.limit --format=csv,noheader,nounits";
+            process.StartInfo.Arguments =
+                "--query-gpu=index,name,temperature.gpu,utilization.gpu,utilization.memory,memory.total,memory.used,memory.free,power.draw,power.limit --format=csv,noheader,nounits";
             process.StartInfo.UseShellExecute = false;
             process.StartInfo.RedirectStandardOutput = true;
             process.StartInfo.RedirectStandardError = true;
             process.StartInfo.CreateNoWindow = true;
 
             process.Start();
-            
+
             var output = await process.StandardOutput.ReadToEndAsync();
             var error = await process.StandardError.ReadToEndAsync();
-            
+
             await process.WaitForExitAsync();
 
             if (process.ExitCode != 0)
@@ -392,11 +406,11 @@ public class SystemStatsController : ControllerBase
             }
 
             var lines = output.Split('\n', StringSplitOptions.RemoveEmptyEntries);
-            
+
             foreach (var line in lines)
             {
                 var values = line.Split(',').Select(v => v.Trim()).ToArray();
-                
+
                 if (values.Length >= 10)
                 {
                     var gpuStats = new GpuStats
@@ -412,7 +426,7 @@ public class SystemStatsController : ControllerBase
                         PowerDrawWatts = double.TryParse(values[8], out var power) ? power : 0,
                         PowerLimitWatts = double.TryParse(values[9], out var powerLimit) ? powerLimit : 0
                     };
-                    
+
                     gpuStatsList.Add(gpuStats);
                 }
             }
@@ -435,7 +449,8 @@ public class SystemStatsController : ControllerBase
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                using var key = Microsoft.Win32.Registry.LocalMachine.OpenSubKey(@"HARDWARE\DESCRIPTION\System\CentralProcessor\0");
+                using var key =
+                    Microsoft.Win32.Registry.LocalMachine.OpenSubKey(@"HARDWARE\DESCRIPTION\System\CentralProcessor\0");
                 return key?.GetValue("ProcessorNameString")?.ToString() ?? "Unknown";
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
@@ -454,7 +469,7 @@ public class SystemStatsController : ControllerBase
                     RedirectStandardOutput = true,
                     CreateNoWindow = true
                 });
-                
+
                 if (process != null)
                 {
                     var result = process.StandardOutput.ReadToEnd().Trim();
@@ -463,7 +478,9 @@ public class SystemStatsController : ControllerBase
                 }
             }
         }
-        catch { }
+        catch
+        {
+        }
 
         return "Unknown";
     }

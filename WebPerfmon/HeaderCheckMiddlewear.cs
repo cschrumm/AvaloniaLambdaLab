@@ -4,7 +4,6 @@ public class HeaderCheckMiddleware
 {
     private readonly RequestDelegate _next;
     private readonly IApiKeyValidationService _apiKeyValidationService;
-
     public HeaderCheckMiddleware(RequestDelegate next, IApiKeyValidationService validationService)
     {
         _next = next;
@@ -15,12 +14,13 @@ public class HeaderCheckMiddleware
     {
         if (context.Request.Headers.TryGetValue("apikey", out var headerValue))
         {
-            if(headerValue.Count==0)
+            if (headerValue.Count == 0)
             {
                 context.Response.StatusCode = StatusCodes.Status400BadRequest;
                 await context.Response.WriteAsync("Missing required header.");
                 return;
             }
+
             var rslt = await _apiKeyValidationService.IsValidApiKeyAsync(headerValue[0]!);
 
             if (!rslt)

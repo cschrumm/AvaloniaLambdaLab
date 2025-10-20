@@ -3,7 +3,6 @@ namespace Service.Library;
 public class SecretManage
 {
     private static string _base_path = System.Environment.GetEnvironmentVariable("SECRET_PATH") ?? "/run/secrets/";
-    
     private static string _lamda_key = String.Empty;
     private static string _github_token = String.Empty;
     
@@ -20,7 +19,6 @@ public class SecretManage
         }
         return SecretManage._lamda_key;
     }
-    
     public static string GetGitHubToken()
     {
         if(SecretManage._github_token == String.Empty)

@@ -14,18 +14,15 @@ Console.WriteLine("Hello, World!");
 
 var pp = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
 
-
 var lmbdaKey = System.Environment.GetEnvironmentVariable("LAMBDA_KEY");
 
 var cclient = new LambdaCloudClient(lmbdaKey ?? "");
-
 /*
  *
  * 1. List instances
  * 2. Create instance
  * 3. Figure out ssh to connect and then run git commands.
  */
-
 System.Threading.Thread.Sleep(1000);
 var mncl = new MainGuiBackend();
 
