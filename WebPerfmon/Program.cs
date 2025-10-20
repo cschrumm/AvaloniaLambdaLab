@@ -36,11 +36,7 @@ builder.Services.AddRateLimiter(options =>
 
 // locate token key
 
-
 builder.WebHost.UseUrls("https://0.0.0.0:7777");
-
-
-
 
 var app = builder.Build();
 app.UseMiddleware<HeaderCheckMiddleware>();
@@ -64,7 +60,6 @@ foreach (var arg in args)
         lkey = true;
     }
 }
-
 
 // determine if there is a debugger attached
 if (System.Diagnostics.Debugger.IsAttached)
