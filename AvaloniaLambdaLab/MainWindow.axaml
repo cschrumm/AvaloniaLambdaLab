@@ -111,6 +111,19 @@
                                 DataContext="{Binding}"
                                 Margin="0,0,10,0"
                         />
+                        <TextBlock Height="35" Text="Git Repo" Margin="0,10,10,0"></TextBlock>
+                        <ComboBox Name="dropdownGitRepo" 
+                                  Width="300" 
+                                  ItemsSource="{Binding #MyWindow.GuiBackend.GitRepos}"
+                                  SelectionChanged="Repo_SelectionChanged"
+                                  Margin="0,0,10,0">
+                        </ComboBox>
+                        <Button Content="Deploy Repository"
+                            Width="150" Height="35" Background="#234C64" Foreground="White"
+                                DataContext="{Binding}"
+                                Click="Deploy_Repository_Click"
+                                Margin="0,0,10,0">
+                        </Button>
                         <Button Content="Copy Directory" 
                                 Width="150"
                                 Height="35"
@@ -118,7 +131,7 @@
                                 Foreground="White"
                                 DataContext="{Binding}" 
                                 Click="CopyToServerButton_Click"
-                                Margin="0,0,10,0"></Button>
+                                Margin="10,0,10,0"></Button>
                     </StackPanel>
                 </DataTemplate>
             </ListBox.ItemTemplate>

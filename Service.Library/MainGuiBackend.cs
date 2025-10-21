@@ -74,7 +74,13 @@ public class MainGuiBackend : INotifyPropertyChanged
         var apiKey =
             SecretManage
                 .GetLambdaKey(); // System.Environment.GetEnvironmentVariable("LAMBDA_KEY"); // Load from secure storage or environment variable
-        _httpClient = new HttpClient();
+        
+        HttpClientHandler handler = new HttpClientHandler();
+        // ignore ssl errors we are self signed
+        handler.ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true;
+        _httpClient = new HttpClient(handler);
+        
+        _httpClient.Timeout = TimeSpan.FromMinutes(5);
 
 
         if (apiKey is null || apiKey == String.Empty)
@@ -179,7 +185,7 @@ public class MainGuiBackend : INotifyPropertyChanged
     {
         var sshManager = new SshClientManager();
         var git_hub_key = SecretManage.GetGitHubToken(); // System.Environment.GetEnvironmentVariable
-        var cmd_ln = $"gh auth login --with-token <<< \"{git_hub_key}\" && gh repo clone {repo.Full_Name}";
+        var cmd_ln = $"echo  \"{git_hub_key}\" | gh auth login --with-token && gh repo clone {repo.Full_Name}";
 
         OnInstanceLaunched?.Invoke("CLEAR");
 
@@ -187,8 +193,8 @@ public class MainGuiBackend : INotifyPropertyChanged
         {
             sshManager.ConnectWithPrivateKey(instance.Ip, 22, "ubuntu", kypath);
             OnLogMessage?.Invoke($"Cloning Repo: {git_hub_key}");
-            OnLogMessage?.Invoke(cmd_ln);
             var rslt = sshManager.ExecuteCommand(cmd_ln);
+            OnLogMessage?.Invoke(cmd_ln.Replace(git_hub_key, "key---****"));
             OnLogMessage?.Invoke(rslt);
         }
         finally
@@ -286,7 +292,7 @@ public class MainGuiBackend : INotifyPropertyChanged
         {
             if (!_httpClient.DefaultRequestHeaders.Contains("apikey"))
                 _httpClient.DefaultRequestHeaders.Add("apikey", _dataForApp.GuidToken);
-            var asp_url = $"http://{instance.Ip}:7777/api/SystemStats/system";
+            var asp_url = $"https://{instance.Ip}:7777/api/SystemStats/system";
             var rslt = await _httpClient.GetFromJsonAsync<SystemStats>(asp_url);
             return rslt;
         }

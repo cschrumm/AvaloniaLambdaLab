@@ -34,21 +34,10 @@ public class DataPoint
         private DispatcherTimer _timer = null!;
         public MainGuiBackend GuiBackend { get; set; } = new MainGuiBackend();
         
+        public Dictionary<Instance, Repository> RepositoriesPerInstance = new();
         public ISeries[] Series { get; set; } = Array.Empty<ISeries>();
         
         private Dictionary<string, List<float>> _chart_data = new();
-
-        
-        // bound with the back ground ...
-        /*
-       
-        */
-       // public string PathToKey { get; set; } = "";
-        
-        /* Log information to screen */
-        
-        
-        
 
         public MainWindow()
         {
@@ -68,38 +57,15 @@ public class DataPoint
             _timer.Interval = TimeSpan.FromSeconds(3);
             _timer.Tick += Timer_Tick;
             _timer.Start();
-            //GuiBackend.OnLogMessage += MonitorLog;
-            //GuiBackend.OnInstanceLaunched += LaunchNotice;
             
-            //GuiBackend.PropertyChanged += Backend;
-            
-            //_backend.LoadAllData();
-            //LoadData();
             GuiBackend.Startup();
         }
-
-        
-        
-        /*
-        public void LaunchNotice(string msg)
-        {
-            IsRunning = GuiBackend.IsRunning;
-            LogViewMessage += msg + "\n";
-            this.CallChangeOnGui(nameof(IsRunning));
-        }
-        */
-        
-        
-        
-        
 
         private void CallChangeOnGui(string nm)
         {
             Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(async () =>
             {
                 await Task.Delay(0);
-                
-                
                
             });
         }
@@ -113,14 +79,11 @@ public class DataPoint
 
             if (GuiBackend.RunningInstances.Count == 0) return;
             
-            
-            
             var mss = _chart_data.Keys.Where(x => !GuiBackend.RunningInstances.Any(i => i.Id == x)).ToList();
 
             foreach (var ms in mss)
             {
                 _chart_data.Remove(ms);
-                //_chart_data.Remove(ms.Key);
             }
 
             var to_remove = new List<Instance>();
@@ -259,21 +222,21 @@ public class DataPoint
             }
         }
 
-        private async void StartButton_Click(object sender, RoutedEventArgs e)
+        private void StartButton_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                await GuiBackend.StartInstance();
+                
+                var rn = GuiBackend.StartInstance();
+                
+                
+
             }
             catch (Exception ex)
             {
                 //Console.WriteLine(exception);
                 GuiBackend.LogViewMessage += "ERROR STARTING INSTANCE\n" + ex.Message + "\n";
-                //this.CallChangeOnGui(nameof(LogViewM
-                //LogViewMessage += "ERROR STARTING: " + exception.Message + "\n";
-                //this.CallChangeOnGui(nameof(LogViewMessage));
-                return;
-                // throw;
+                
             }
            
         }
@@ -304,9 +267,6 @@ public class DataPoint
         
         private async void CopyToServerButton_Click(object sender, RoutedEventArgs e)
         {
-            // Logic to launch an instance using selected parameters
-            //_backend.LaunchBrowser();
-            
             var ins = sender as Button;
             
             if (ins != null && ins.DataContext is Instance)
@@ -317,7 +277,13 @@ public class DataPoint
                     var fldr = await FindDirectory();
                     if (!string.IsNullOrEmpty(fldr))
                     {
-                        GuiBackend.ZipAndUpload(fldr, instance);
+                        var t= Task.Run(async () =>
+                        {
+                            GuiBackend.ZipAndUpload(fldr, instance);
+                            await Task.CompletedTask;
+                        });
+                        
+                        
                     }
                     //GuiBackend.CopyToServer(instance);
                 }
@@ -430,6 +396,43 @@ public class DataPoint
             }
             
         }
+
+        private async void Repo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (sender is ComboBox combo 
+                && combo.SelectedItem != null 
+                && combo.DataContext is Instance instance && combo.SelectedItem is Repository repo)
+            {
+                    if (this.RepositoriesPerInstance.ContainsKey(instance) == false)
+                    {
+                        this.RepositoriesPerInstance.Add(instance, repo);
+                    }
+                    else
+                    {
+                        this.RepositoriesPerInstance[instance] = repo;
+                    }
+            }
+            
+            await Task.CompletedTask;
+            
+        }
+        
+        private async void Deploy_Repository_Click(object sender, RoutedEventArgs e)
+        {
+            // Logic to launch an instance using selected parameters
+            var ins = sender as Button;
+            await Task.Delay(0);
+            if (ins != null && ins.DataContext is not null 
+                            && ins.DataContext is Instance instance
+                            && this.RepositoriesPerInstance.ContainsKey((ins.DataContext as Instance)!))
+            {
+                   var repo = this.RepositoriesPerInstance[instance];
+                   GuiBackend.InstallRepo(repo, instance,GuiBackend.PathToKey);
+            }
+            
+            await Task.CompletedTask;
+            
+        }
         
         private async Task<bool> AskDelete(string name)
         {
@@ -444,12 +447,8 @@ public class DataPoint
         
         private void Unload_Window(object? sender, RoutedEventArgs e)
         {
-            // copy back to backend
-            //Utils.CopyProperties(this, GuiBackend);
             GuiBackend.Shutdown();
         }
-        
-        
        
 
         private void CallOnGui(Action action)
