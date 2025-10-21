@@ -40,3 +40,7 @@
 /home/madmax-machine/Documents/mycode/AvaloniaLambdaLab/WebPerfmon/bin/Debug/net9.0/Renci.SshNet.dll
 /home/madmax-machine/Documents/mycode/AvaloniaLambdaLab/WebPerfmon/bin/Debug/net9.0/Service.Library.dll
 /home/madmax-machine/Documents/mycode/AvaloniaLambdaLab/WebPerfmon/bin/Debug/net9.0/Service.Library.pdb
+/home/madmax-machine/Documents/mycode/AvaloniaLambdaLab/WebPerfmon/bin/Debug/net9.0/LiveChartsCore.dll
+/home/madmax-machine/Documents/mycode/AvaloniaLambdaLab/WebPerfmon/bin/Debug/net9.0/LiveChartsCore.SkiaSharpView.dll
+/home/madmax-machine/Documents/mycode/AvaloniaLambdaLab/WebPerfmon/bin/Debug/net9.0/LiveChartsCore.xml
+/home/madmax-machine/Documents/mycode/AvaloniaLambdaLab/WebPerfmon/bin/Debug/net9.0/LiveChartsCore.SkiaSharpView.xml

@@ -9,6 +9,8 @@ using System.Runtime.InteropServices;
 using System.Management;
 using System.IO;
 
+// on windows we will compile with warnings about unsupported platforms disabled.
+#pragma warning disable CA1416 
 [ApiController]
 [Route("api/[controller]")]
 public class SystemStatsController : ControllerBase
@@ -60,6 +62,7 @@ public class SystemStatsController : ControllerBase
         try
         {
             var memoryStats = GetMemoryUsage();
+            await Task.CompletedTask;
             return Ok(memoryStats);
         }
         catch (Exception ex)
