@@ -535,6 +535,7 @@ public class MainGuiBackend : INotifyPropertyChanged
         //RunningInstances.Add(instance);
 
         OnPropertyChanged(nameof(RunningInstances));
+        
 
         int tries = 0;
         while (instance.Status.ToLower() != "active"
