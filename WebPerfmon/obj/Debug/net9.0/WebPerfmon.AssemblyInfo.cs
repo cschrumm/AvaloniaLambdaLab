@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("WebPerfmon")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c379e53ae04f3f770dcc0952c296e89ce4c6faeb")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+179efdaa9150dbbf485c11632f3b48dcf653f235")]
 [assembly: System.Reflection.AssemblyProductAttribute("WebPerfmon")]
 [assembly: System.Reflection.AssemblyTitleAttribute("WebPerfmon")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
