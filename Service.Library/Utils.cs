@@ -1,3 +1,6 @@
+using System.Collections.ObjectModel;
+using System.Runtime.InteropServices.JavaScript;
+
 namespace Service.Library;
 
 public static class Utils
@@ -25,6 +28,75 @@ public static class Utils
         }
         
     }
+
+
+    public static void SyncronizeCollections<T>(this Collection<T> dest_collection, Collection<T> source_collection,
+        Func<T, T, bool> validItems,
+        Action<T,T>? updateItem = null)
+    {
+        // Remove items not in source
+        var tmp = new List<T>();
+        
+        foreach (var sr in dest_collection)
+        {
+            bool found = false;
+            foreach (var ds in source_collection)
+            {
+                if (validItems(ds, sr))
+                {
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found)
+            {
+                tmp.Add(sr);
+            }
+        }
+
+        foreach (var rem in tmp)
+        {
+            dest_collection.Remove(rem);
+        }
+
+        // Add items from source not in collection
+        foreach (var ds in source_collection)
+        {
+            bool found = false;
+            foreach (var cl in dest_collection)
+            {
+                if(validItems(cl, ds))
+                {
+                    found = true;
+                    break;
+                }
+            }
+            
+            if (!found)
+            {
+                dest_collection.Add(ds);
+            }
+        }
+        
+        // Update existing items
+        foreach (var ds in source_collection)
+        {
+            foreach (var cl in dest_collection)
+            {
+                if (validItems(cl, ds))
+                {
+                    updateItem?.Invoke(cl, ds);
+                    break;
+                }
+            }
+        }
+
+
+}
+    
+    
+    
     
     /*
      *

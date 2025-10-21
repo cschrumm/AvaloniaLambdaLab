@@ -35,9 +35,9 @@ public class DataPoint
         public MainGuiBackend GuiBackend { get; set; } = new MainGuiBackend();
         
         public Dictionary<Instance, Repository> RepositoriesPerInstance = new();
-        public ISeries[] Series { get; set; } = Array.Empty<ISeries>();
+        // public ISeries[] Series { get; set; } = Array.Empty<ISeries>();
         
-        private Dictionary<string, List<float>> _chart_data = new();
+        //private Dictionary<string, List<float>> _chart_data = new();
 
         public MainWindow()
         {
@@ -53,12 +53,13 @@ public class DataPoint
 
         private void OnLoaded(object sender, RoutedEventArgs e)
         {
+            GuiBackend.Startup();
             _timer = new DispatcherTimer();
-            _timer.Interval = TimeSpan.FromSeconds(3);
+            _timer.Interval = TimeSpan.FromSeconds(4);
             _timer.Tick += Timer_Tick;
             _timer.Start();
             
-            GuiBackend.Startup();
+            
         }
 
         private void CallChangeOnGui(string nm)
@@ -75,74 +76,14 @@ public class DataPoint
         {
             // Update a UI element, for example, a TextBlock
             // MyTextBlock.Text = DateTime.Now.ToLongTimeString(); 
-            List<ISeries> series = new List<ISeries>();
-
-            if (GuiBackend.RunningInstances.Count == 0) return;
+            Task.Run(async () =>
+            {
+               //this._timer.Stop(); 
+               await GuiBackend.UpdateSeries();
+               //this._timer.Start();
+            });
             
-            var mss = _chart_data.Keys.Where(x => !GuiBackend.RunningInstances.Any(i => i.Id == x)).ToList();
 
-            foreach (var ms in mss)
-            {
-                _chart_data.Remove(ms);
-            }
-
-            var to_remove = new List<Instance>();
-            foreach (var i in GuiBackend.RunningInstances)
-            {
-                
-                    
-                    Task.Run(async () =>
-                    {
-                        var ins = await GuiBackend.GetInstance(i.Id);
-
-                        if (ins is null)
-                        {
-                            to_remove.Add(i);
-                        }
-                        else
-                        {
-                            i.Status = ins.Status;
-
-                            if (i.Status != "active")
-                                return;
-                            
-                            var sts =await GuiBackend.GetInstanceData(i);
-
-                            if (!_chart_data.ContainsKey(i.Id))
-                            {
-                                _chart_data.Add(i.Id,new  List<float>());
-                            }
-
-                            if (sts is null)
-                                return;
-                            var lst = _chart_data[i.Id];
-
-                            var ttl =(float)sts.GpuStats.Sum(g => g.UtilizationPercentage) /
-                                      (sts.GpuStats.Count == 0 ? 1 : sts.GpuStats.Count);
-                            //var tst = (float)(new Random()).NextDouble() * 100;
-                            lst.Add(ttl);
-                            if (lst.Count > 40)
-                            {
-                                lst.RemoveAt(0);
-                            }
-                            series.Add(new LineSeries<float>
-                            {
-                                Name = i.Name,
-                                Values = lst,
-                                Fill = null
-                            });
-                        }
-                        
-                    }).Wait();
-                    
-                
-            }
-            foreach (var r in to_remove)
-            {
-               GuiBackend.RunningInstances.Remove(r);
-            }
-            this.Series = series.ToArray();
-            
         }
 
         private void InitializeComponent()
@@ -222,12 +163,16 @@ public class DataPoint
             }
         }
 
-        private void StartButton_Click(object sender, RoutedEventArgs e)
+        private async void StartButton_Click(object sender, RoutedEventArgs e)
         {
             try
             {
+
+                await Task.Run(async () =>
+                {
+                   await GuiBackend.StartInstance();
+                });
                 
-                var rn = GuiBackend.StartInstance();
                 
                 
 
@@ -279,8 +224,8 @@ public class DataPoint
                     {
                         var t= Task.Run(async () =>
                         {
-                            GuiBackend.ZipAndUpload(fldr, instance);
-                            await Task.CompletedTask;
+                            await GuiBackend.ZipAndUpload(fldr, instance);
+                           
                         });
                     }
                     //GuiBackend.CopyToServer(instance);
@@ -425,10 +370,8 @@ public class DataPoint
                             && this.RepositoriesPerInstance.ContainsKey((ins.DataContext as Instance)!))
             {
                    var repo = this.RepositoriesPerInstance[instance];
-                   GuiBackend.InstallRepo(repo, instance,GuiBackend.PathToKey);
+                   await GuiBackend.InstallRepo(repo, instance,GuiBackend.PathToKey);
             }
-            
-            await Task.CompletedTask;
             
         }
         

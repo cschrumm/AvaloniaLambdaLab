@@ -8,6 +8,8 @@ using System.Net.Http;
 using System.Net.Http.Json;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using LiveChartsCore;
+using LiveChartsCore.SkiaSharpView;
 using Service.Library;
 
 namespace Service.Library;
@@ -38,12 +40,21 @@ public class MainGuiBackend : INotifyPropertyChanged
 {
     // talks to the lambda cloud and manages the instance
     private readonly LambdaCloudClient _cloudClient;
+
     private readonly GitHubApiClient _gitHubClient;
+
     // used to talk to the instance api
     private readonly HttpClient _httpClient;
+
     //private string _api_url = "";
     private string _app_data_path = System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) +
                                     "/AvaloniaLambdaLab";
+    
+    
+
+    public ISeries[] Series { get; set; } = Array.Empty<ISeries>();
+
+    private Dictionary<string, List<float>> _chart_data = new();
 
     private DataForApp _dataForApp = new(); // load by front end
     public event Action<string>? OnLogMessage;
@@ -74,12 +85,12 @@ public class MainGuiBackend : INotifyPropertyChanged
         var apiKey =
             SecretManage
                 .GetLambdaKey(); // System.Environment.GetEnvironmentVariable("LAMBDA_KEY"); // Load from secure storage or environment variable
-        
+
         HttpClientHandler handler = new HttpClientHandler();
         // ignore ssl errors we are self signed
         handler.ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true;
         _httpClient = new HttpClient(handler);
-        
+
         _httpClient.Timeout = TimeSpan.FromMinutes(5);
 
 
@@ -115,10 +126,12 @@ public class MainGuiBackend : INotifyPropertyChanged
         //this.LoadAppData();
     }
 
-    public void LoadAppData()
+    public async Task LoadAppData()
     {
         // Load any saved application data from a file app.json
         var app_file = $"{_app_data_path}/app.json";
+        bool data_changed = false;
+        
         if (File.Exists(app_file))
         {
             var json = File.ReadAllText(app_file);
@@ -126,11 +139,17 @@ public class MainGuiBackend : INotifyPropertyChanged
         }
         else
         {
+             data_changed = true;
             _dataForApp = new DataForApp();
         }
-
+        
+        
         if (_dataForApp.GuidToken is null || _dataForApp.GuidToken == String.Empty)
+        {
+            data_changed = true;
             _dataForApp.GuidToken = Guid.NewGuid().ToString();
+        }
+            
 
 
         PathToKey = _dataForApp.PathToPrivateKey ?? String.Empty;
@@ -155,6 +174,10 @@ public class MainGuiBackend : INotifyPropertyChanged
             SelectedImage = Images.Where(i => i.Id == _dataForApp.SelectedImageId).FirstOrDefault()!;
         }
 
+        if (data_changed)
+        {
+           await SaveAppData();
+        }
 
         OnPropertyChanged(nameof(PathToKey));
         OnPropertyChanged(nameof(SelectedFilesystem));
@@ -181,26 +204,13 @@ public class MainGuiBackend : INotifyPropertyChanged
     }
 
 
-    public void InstallRepo(Repository repo, Instance instance, string kypath)
+    public async Task InstallRepo(Repository repo, Instance instance, string kypath)
     {
-        var sshManager = new SshClientManager();
-        var git_hub_key = SecretManage.GetGitHubToken(); // System.Environment.GetEnvironmentVariable
-        var cmd_ln = $"echo  \"{git_hub_key}\" | gh auth login --with-token && gh repo clone {repo.Full_Name}";
-
-        OnInstanceLaunched?.Invoke("CLEAR");
-
-        try
-        {
-            sshManager.ConnectWithPrivateKey(instance.Ip, 22, "ubuntu", kypath);
-            OnLogMessage?.Invoke($"Cloning Repo: {git_hub_key}");
-            var rslt = sshManager.ExecuteCommand(cmd_ln);
-            OnLogMessage?.Invoke(cmd_ln.Replace(git_hub_key, "key---****"));
-            OnLogMessage?.Invoke(rslt);
-        }
-        finally
-        {
-            sshManager.Disconnect();
-        }
+        
+        SshDeploy dply = new SshDeploy(instance.Ip, kypath, "ubuntu", 22);
+        dply.OnLogMessage += (msg) => OnLogMessage?.Invoke(msg);
+        await dply.DeployRepository(repo, SecretManage.GetGitHubToken());
+        
     }
 
     public void MonitorLog(string msg)
@@ -224,20 +234,11 @@ public class MainGuiBackend : INotifyPropertyChanged
     public void Startup()
     {
         Task.Run(async () =>
-        {
+        {   
             await this.LoadLambdaData();
             await this.LoadGitHubData();
-            this.LoadAppData();
-
-            var insts = await _cloudClient.ListInstancesAsync();
-
-            foreach (var inst in insts)
-            {
-                RunningInstances.Add(inst);
-            }
-
-            OnPropertyChanged(nameof(RunningInstances));
-        });
+            await this.LoadAppData();
+        }).Wait();
     }
 
     // get a list of available servers you can create
@@ -271,11 +272,13 @@ public class MainGuiBackend : INotifyPropertyChanged
         return rslt;
     }
 
+    /*
     public async Task<List<Instance>> ListInstances()
     {
         var rslt = await _cloudClient.ListInstancesAsync();
         return rslt;
     }
+    */
 
     // get a list of ssh keys
     public async Task<List<SSHKey>> ListSshKeys()
@@ -287,22 +290,110 @@ public class MainGuiBackend : INotifyPropertyChanged
     public async Task<SystemStats?> GetInstanceData(Instance instance)
     {
         // add token to header apikey
-
+        var asp_url = $"https://{instance.Ip}:7777/api/SystemStats/system";
         try
         {
+            if (_dataForApp.GuidToken.IsNullOrEmpty())
+            {
+                throw new Exception("Guid token is null or empty");
+            }
+                
             if (!_httpClient.DefaultRequestHeaders.Contains("apikey"))
                 _httpClient.DefaultRequestHeaders.Add("apikey", _dataForApp.GuidToken);
-            var asp_url = $"https://{instance.Ip}:7777/api/SystemStats/system";
+            
             var rslt = await _httpClient.GetFromJsonAsync<SystemStats>(asp_url);
             return rslt;
         }
         catch (Exception e)
         {
+            Console.WriteLine($"Error getting instance data from {asp_url}");
             Console.WriteLine(e);
             // throw;
         }
 
         return null;
+    }
+
+    public async Task UpdateSeries()
+    {
+        List<ISeries> series = new List<ISeries>();
+        
+        var insts =  await _cloudClient.ListInstancesAsync();
+        
+        //var running_ids = insts.Select(i => i.Id).ToList();
+        
+        var collection = new Collection<Instance>(insts);
+        
+        this.RunningInstances.SyncronizeCollections(collection,(a,b)=> a.Id == b.Id,
+            (src,dest) =>
+            {
+                dest.Status = src.Status;
+                dest.JupyterUrl = src.JupyterUrl;
+            });
+        
+        OnPropertyChanged(nameof(RunningInstances));
+        
+        
+
+        var mss = _chart_data.Keys.Where(x => !this.RunningInstances.Any(i => i.Id == x)).ToList();
+
+        foreach (var ms in mss)
+        {
+            _chart_data.Remove(ms);
+        }
+
+        var to_remove = new List<Instance>();
+        foreach (var i in this.RunningInstances)
+        {
+            var ins = await this.GetInstance(i.Id);
+
+            if (ins is null)
+            {
+                to_remove.Add(i);
+            }
+            else
+            {
+
+                if (i.Status != "active")
+                    return;
+
+                var sts = await this.GetInstanceData(i);
+
+                if (!_chart_data.ContainsKey(i.Id))
+                {
+                    _chart_data.Add(i.Id, new List<float>());
+                }
+
+                if (sts is null)
+                    return;
+                var lst = _chart_data[i.Id];
+
+                var ttl = (float)sts.GpuStats.Sum(g => g.UtilizationPercentage) /
+                          (sts.GpuStats.Count == 0 ? 1 : sts.GpuStats.Count);
+                //var tst = (float)(new Random()).NextDouble() * 100;
+                lst.Add(ttl);
+                if (lst.Count > 40)
+                {
+                    lst.RemoveAt(0);
+                }
+
+                series.Add(new LineSeries<float>
+                {
+                    Name = i.Name,
+                    Values = lst,
+                    Fill = null
+                });
+            }
+        }
+
+        foreach (var r in to_remove)
+        {
+            this.RunningInstances.Remove(r);
+        }
+
+        this.Series = series.ToArray();
+
+        OnPropertyChanged(nameof(Series));
     }
 
     public async Task LoadLambdaData()
@@ -416,7 +507,7 @@ public class MainGuiBackend : INotifyPropertyChanged
         /* Crude naming convention */
         var cntr = RunningInstances.Count + 1;
         var instName = $"{SelectedInstance.Name}-{cntr}";
-        OnLogMessage?.Invoke($"Staring..");
+        OnLogMessage?.Invoke($"Staring.. Please be patient this may take several minutes...");
 
         var flsys_name = (SelectedFilesystem is null || SelectedFilesystem?.Name == "")
             ? null
@@ -427,7 +518,7 @@ public class MainGuiBackend : INotifyPropertyChanged
 
         if (insts is null || !insts.Any()) throw new Exception("Failed to create instance");
         OnLogMessage?.Invoke($"Waiting for setup");
-        await Task.Delay(20000); // give it a second to show up in the list
+        await Task.Delay(10000); // give it a second to show up in the list
 
         var instance =
             await _cloudClient
@@ -501,48 +592,19 @@ public class MainGuiBackend : INotifyPropertyChanged
 
     public async Task SShSetup(Instance instance, string kypath, string token)
     {
-        var sshManager = new SshClientManager();
-
-        try
-        {
-            sshManager.ConnectWithPrivateKey(instance.Ip, 22, "ubuntu", kypath);
-
-            await this.SetupRemoteServer(sshManager, token);
-        }
-        finally
-        {
-            sshManager.Disconnect();
-        }
+        SshDeploy dply = new SshDeploy(instance.Ip, kypath, "ubuntu", 22);
+        dply.OnLogMessage += (msg) => OnLogMessage?.Invoke(msg);
+        await dply.DeployRequirements(token);
     }
 
 
-    public void ZipAndUpload(string path, Instance instance)
+    public async Task ZipAndUpload(string path, Instance instance)
     {
-        var sshManager = new SshClientManager();
-        try
-        {
-            sshManager.ConnectWithPrivateKey(instance.Ip, 22, "ubuntu", PathToKey);
-            sshManager.StartSftpSession();
-
-            var nw = new DirectoryInfo(path);
-            // get tempary directory
-
-            OnLogMessage?.Invoke("CLEAR");
-            OnLogMessage?.Invoke($"Uploading {nw.FullName} zipping..");
-            var tmp_dir = Path.Combine(Path.GetTempPath(), "tmp_repo.zip");
-            if (File.Exists(tmp_dir)) File.Delete(tmp_dir);
-
-            System.IO.Compression.ZipFile.CreateFromDirectory(path, tmp_dir);
-            OnLogMessage?.Invoke($"Zipped {nw.Name} sending...");
-            sshManager.UploadFile(tmp_dir, nw.Name + ".zip");
-            OnLogMessage?.Invoke($"Upload complete unzipping on server...");
-            var rslt = sshManager.ExecuteCommand($"unzip -o {nw.Name}.zip -d {nw.Name}");
-            OnLogMessage?.Invoke(rslt);
-        }
-        finally
-        {
-            sshManager.Disconnect();
-        }
+        
+        SshDeploy dply = new SshDeploy(instance.Ip, PathToKey, "ubuntu", 22);
+        dply.OnLogMessage += (msg) => OnLogMessage?.Invoke(msg);
+        await dply.CopyDirectory(path);
+        
     }
 
     public async Task<Instance> GetInstance(string instanceId)
@@ -560,8 +622,8 @@ public class MainGuiBackend : INotifyPropertyChanged
             // For .NET Core Process.Start on URLs
             var psi = new ProcessStartInfo
             {
-                FileName = "google-chrome",
-                Arguments = "--new-window " + instance.JupyterUrl,
+                FileName = "firefox",
+                Arguments = "-private-window " + instance.JupyterUrl,
                 UseShellExecute = true
             };
             Process.Start(psi);
@@ -569,59 +631,6 @@ public class MainGuiBackend : INotifyPropertyChanged
         catch (Exception ex)
         {
             OnLogMessage?.Invoke($"Failed to launch browser: {ex.Message}");
-        }
-    }
-
-    private async Task SetupRemoteServer(SshClientManager manager, string token)
-    {
-        /*
-         *  Sets up and runs the remote server....
-         *
-         *  1. Install git
-         *  2. Install wget
-         *  3. Install github cli
-         *  4. Install dotnet sdk
-         *  5. Clone your repo
-         *  6. Build and run your project
-         *  7. Open the port in the firewall
-         *  8. Run the app in the background
-         */
-        var cmds = new List<string>
-        {
-            "sudo apt update", /* update package lists */
-            "sudo apt install git -y", /* install git */
-            "sudo apt install wget -y", /* install wget */
-            "sudo mkdir -p -m 755 /etc/apt/keyrings", /* create keyrings directory */
-            "wget -qO- https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo tee /etc/apt/keyrings/githubcli-archive-keyring.gpg > /dev/null",
-            "sudo chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg",
-            "echo \"deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main\" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null",
-            "sudo apt update", /* update package lists again */
-            "sudo apt install gh -y",
-            "sudo add-apt-repository ppa:dotnet/backports", /* add dotnet repo */
-            "sudo apt update", /* update package lists again */
-            "sudo apt-get install -y dotnet-sdk-9.0", /* install dotnet sdk */
-            "sudo apt-get install -y aspnetcore-runtime-9.0", /* install dotnet runtime */
-            "dotnet dev-certs https --trust" /* trust the dev certs */,
-            "rm -r AvaloniaLambdaLab", /* remove any existing repo */
-            "rm -r publish", /* remove any existing publish directory */
-            "git clone https://github.com/cschrumm/AvaloniaLambdaLab.git", /* clone your repo */
-            "cd ./AvaloniaLambdaLab/WebPerfmon", /* change to your project directory */
-            "pwd", /* print working directory for verification */
-            "dotnet build ./AvaloniaLambdaLab/WebPerfmon/WebPerfmon.csproj -c Release -o ./publish", /* publish the project */
-            "sudo ufw allow 7777", /* open the port in the firewall */
-            $"./publish/WebPerfmon --token {token} > app.log 2>&1 &", /* run the app in the background */
-        };
-
-        OnLogMessage?.Invoke("CLEAR");
-        foreach (var cmd in cmds)
-        {
-            // get current datetime
-            var inpt = $"{System.DateTime.Now} - Executing: {cmd}";
-            OnLogMessage?.Invoke(inpt);
-            await Task.Delay(100);
-            var rslt = manager.ExecuteCommand(cmd);
-            await Task.Delay(100);
-            OnLogMessage?.Invoke(rslt);
         }
     }
 
