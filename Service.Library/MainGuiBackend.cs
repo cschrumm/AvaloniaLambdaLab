@@ -532,7 +532,7 @@ public class MainGuiBackend : INotifyPropertyChanged
             await _cloudClient
                 .GetInstanceAsync(insts[0]); //(await _cloudClient.ListInstancesAsync()).Find(i => i.Id == insts[0]);
 
-        RunningInstances.Add(instance);
+        //RunningInstances.Add(instance);
 
         OnPropertyChanged(nameof(RunningInstances));
 
@@ -540,7 +540,7 @@ public class MainGuiBackend : INotifyPropertyChanged
         while (instance.Status.ToLower() != "active"
                && instance.Status.ToLower() != "running")
         {
-            await Task.Delay(10000);
+            await Task.Delay(8000);
             tries++;
             // print on mod 10
             if (tries % 10 == 0)

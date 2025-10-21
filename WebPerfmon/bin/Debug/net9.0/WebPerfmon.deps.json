@@ -8,8 +8,6 @@
     ".NETCoreApp,Version=v9.0": {
       "WebPerfmon/1.0.0": {
         "dependencies": {
-          "Microsoft.DotNet.ILCompiler": "9.0.5",
-          "Microsoft.NET.ILLink.Tasks": "9.0.5",
           "Service.Library": "1.0.0",
           "System.Management": "9.0.9"
         },
@@ -25,14 +23,12 @@
           }
         }
       },
-      "Microsoft.DotNet.ILCompiler/9.0.5": {},
       "Microsoft.Extensions.DependencyInjection.Abstractions/8.0.2": {},
       "Microsoft.Extensions.Logging.Abstractions/8.0.3": {
         "dependencies": {
           "Microsoft.Extensions.DependencyInjection.Abstractions": "8.0.2"
         }
       },
-      "Microsoft.NET.ILLink.Tasks/9.0.5": {},
       "SSH.NET/2025.0.0": {
         "dependencies": {
           "BouncyCastle.Cryptography": "2.5.1",
@@ -82,6 +78,22 @@
             "fileVersion": "1.0.0.0"
           }
         }
+      },
+      "LiveChartsCore/2.0.0.0": {
+        "runtime": {
+          "LiveChartsCore.dll": {
+            "assemblyVersion": "2.0.0.0",
+            "fileVersion": "2.0.0.0"
+          }
+        }
+      },
+      "LiveChartsCore.SkiaSharpView/2.0.0.0": {
+        "runtime": {
+          "LiveChartsCore.SkiaSharpView.dll": {
+            "assemblyVersion": "2.0.0.0",
+            "fileVersion": "2.0.0.0"
+          }
+        }
       }
     }
   },
@@ -98,13 +110,6 @@
       "path": "bouncycastle.cryptography/2.5.1",
       "hashPath": "bouncycastle.cryptography.2.5.1.nupkg.sha512"
     },
-    "Microsoft.DotNet.ILCompiler/9.0.5": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-rfDodV68TLSUgVM6ZQusuUXD7GAIqwCKJWlPtfsd99iLlLbeGfqUQE7Xo8xLa1ju5GCdSBO0q35suzZ8ppclpA==",
-      "path": "microsoft.dotnet.ilcompiler/9.0.5",
-      "hashPath": "microsoft.dotnet.ilcompiler.9.0.5.nupkg.sha512"
-    },
     "Microsoft.Extensions.DependencyInjection.Abstractions/8.0.2": {
       "type": "package",
       "serviceable": true,
@@ -118,13 +123,6 @@
       "sha512": "sha512-dL0QGToTxggRLMYY4ZYX5AMwBb+byQBd/5dMiZE07Nv73o6I5Are3C7eQTh7K2+A4ct0PVISSr7TZANbiNb2yQ==",
       "path": "microsoft.extensions.logging.abstractions/8.0.3",
       "hashPath": "microsoft.extensions.logging.abstractions.8.0.3.nupkg.sha512"
-    },
-    "Microsoft.NET.ILLink.Tasks/9.0.5": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-4L7wbb3Y4BJgIeSnmAf/C6S/qCs9rT1b0dX72uj3qo0qvUH7D0U1tU5ZlC7A3Wb8E/dXK4caOi4JkdLTVJaXhw==",
-      "path": "microsoft.net.illink.tasks/9.0.5",
-      "hashPath": "microsoft.net.illink.tasks.9.0.5.nupkg.sha512"
     },
     "SSH.NET/2025.0.0": {
       "type": "package",
@@ -149,6 +147,16 @@
     },
     "Service.Library/1.0.0": {
       "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "LiveChartsCore/2.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "LiveChartsCore.SkiaSharpView/2.0.0.0": {
+      "type": "reference",
       "serviceable": false,
       "sha512": ""
     }
