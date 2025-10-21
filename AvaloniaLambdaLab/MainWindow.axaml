@@ -61,7 +61,7 @@
             <StackPanel Margin="0,0,5,0">
                 <TextBlock Text="Lambda Ssh:" Margin="0,0,0,5"/>
                 <StackPanel Orientation="Horizontal">
-                    <TextBox Name="GitKey" Text="{Binding #MyWindow.GuiBackend.PathToKey}" Width="400"></TextBox>
+                    <TextBox Name="GitKey" Text="{Binding #MyWindow.GuiBackend.PathToKey}" PasswordChar="*"  Width="400"></TextBox>
                     <TextBlock Text="" Margin="0,0,5,5"/>
                     <Button Content="Select Key"
                             Background="#1B3C53"

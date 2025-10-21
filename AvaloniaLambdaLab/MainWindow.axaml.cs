@@ -61,7 +61,8 @@ public class DataPoint
             
             
         }
-
+       
+        
         private void CallChangeOnGui(string nm)
         {
             Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(async () =>

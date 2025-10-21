@@ -6,6 +6,7 @@ using System.Data;
 using System.Diagnostics;
 using System.Net.Http;
 using System.Net.Http.Json;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using LiveChartsCore;
@@ -47,8 +48,10 @@ public class MainGuiBackend : INotifyPropertyChanged
     private readonly HttpClient _httpClient;
 
     //private string _api_url = "";
-    private string _app_data_path = System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) +
-                                    "/AvaloniaLambdaLab";
+    // better cross platform way to get app data path
+    private string _app_data_path =
+        Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+            (Process.GetCurrentProcess().ProcessName ?? "LambdaAppData"));
     
     
 
@@ -81,6 +84,11 @@ public class MainGuiBackend : INotifyPropertyChanged
     public MainGuiBackend()
     {
         OnLogMessage += MonitorLog;
+
+        if (Directory.Exists(_app_data_path) == false)
+        {
+            Directory.CreateDirectory(_app_data_path);
+        }
 
         var apiKey =
             SecretManage
