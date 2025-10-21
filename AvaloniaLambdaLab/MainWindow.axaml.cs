@@ -310,9 +310,9 @@ public class DataPoint
             // Handle dropdown 2 selection change
             if (sender is ComboBox combo && combo.SelectedItem != null)
             {
-                // Process selection
+                
                 var selectedItem = combo.SelectedItem.ToString();
-                // Add your logic here
+                
             }
         }
         
@@ -366,9 +366,9 @@ public class DataPoint
             // Handle dropdown 3 selection change
             if (sender is ComboBox combo && combo.SelectedItem != null)
             {
-                // Process selection
+                
                 var selectedItem = combo.SelectedItem.ToString();
-                // Add your logic here
+              
             }
         }
         
@@ -377,9 +377,9 @@ public class DataPoint
             // Handle dropdown 3 selection change
             if (sender is ComboBox combo && combo.SelectedItem != null)
             {
-                // Process selection
+                
                 var selectedItem = combo.SelectedItem.ToString();
-                // Add your logic here
+                
             }
         }
 
