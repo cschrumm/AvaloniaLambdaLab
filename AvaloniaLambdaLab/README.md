@@ -30,5 +30,7 @@ Please note that this application is without warranty and is intended for educat
 Use it at your own risk. Make sure to review and understand the code before using it in a production environment.
 Always follow best practices for security, especially when dealing with API keys and sensitive data.
 
+This application is still work in progress and may have bugs or incomplete features.
+
 
 
