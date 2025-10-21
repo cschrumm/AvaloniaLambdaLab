@@ -282,8 +282,6 @@ public class DataPoint
                             GuiBackend.ZipAndUpload(fldr, instance);
                             await Task.CompletedTask;
                         });
-                        
-                        
                     }
                     //GuiBackend.CopyToServer(instance);
                 }
