@@ -72,15 +72,34 @@ public class DataPoint
             });
         }
 
-        
+        int lastErrorCount = 0;
         private void Timer_Tick(object? sender, EventArgs e)
         {
             // Update a UI element, for example, a TextBlock
             // MyTextBlock.Text = DateTime.Now.ToLongTimeString(); 
+            
+            if(lastErrorCount > 0)
+            {
+                Console.WriteLine($"Last error: {lastErrorCount}");
+                lastErrorCount--;
+                return;
+            }
+            
             Task.Run(async () =>
             {
                //this._timer.Stop(); 
-               await GuiBackend.UpdateSeries();
+               try
+               {
+                   await GuiBackend.UpdateSeries();
+               }
+               catch (Exception exception)
+               {
+                   // if there is an error, wait a bit longer before trying again
+                   lastErrorCount += 30;
+                   Console.WriteLine(exception);
+                   //throw;
+               }
+               
                //this._timer.Start();
             });
             

@@ -112,6 +112,7 @@ public class SshDeploy
             "git clone https://github.com/cschrumm/AvaloniaLambdaLab.git", /* clone your repo */
             "cd ./AvaloniaLambdaLab/WebPerfmon", /* change to your project directory */
             "pwd", /* print working directory for verification */
+            "dotnet restore ./AvaloniaLambdaLab/WebPerfmon/WebPerfmon.csproj",
             "dotnet build ./AvaloniaLambdaLab/WebPerfmon/WebPerfmon.csproj -c Release -o ./publish", /* publish the project */
             "sudo ufw allow 7777", /* open the port in the firewall */
             $"./publish/WebPerfmon --token {token} > app.log 2>&1 &", /* run the app in the background */
