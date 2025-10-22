@@ -31,7 +31,7 @@ dotnet build .
 
 ## Architecture
 
-[image_architecture_placeholder](Service.Library/Docs/DiagramView.png)
+![Architecture](https://github.com/cschrumm/AvaloniaLambdaLab/blob/master/Service.Library/Docs/DiagramView.png)
 
 ## Notes
 
@@ -41,7 +41,7 @@ Always follow best practices for security, especially when dealing with API keys
 
 This application is still work in progress and may have bugs or incomplete features.
 
-[screen_sample_placeholder](Service.Library/Docs/LatestScreen.png)
+![screen shot](https://github.com/cschrumm/AvaloniaLambdaLab/blob/master/Service.Library/Docs/LatestScreen.png)
 
 
 
