@@ -34,4 +34,8 @@
     <ItemGroup>
       <ProjectReference Include="..\Service.Library\Service.Library.csproj" />
     </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="README.md" />
+    </ItemGroup>
 </Project>

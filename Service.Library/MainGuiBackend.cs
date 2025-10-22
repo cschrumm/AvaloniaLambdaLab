@@ -79,7 +79,7 @@ public class MainGuiBackend : INotifyPropertyChanged
     public ObservableCollection<Instance> RunningInstances { get; set; } = new();
     public string PathToKey { get; set; } = "";
     public string LogViewMessage { get; set; } = "";
-    public bool IsRunning { get; private set; }
+    
 
     public MainGuiBackend()
     {
@@ -330,18 +330,23 @@ public class MainGuiBackend : INotifyPropertyChanged
         
         //var running_ids = insts.Select(i => i.Id).ToList();
         
-        var collection = new Collection<Instance>(insts);
+        //var collection = new Collection<Instance>(insts);
         
-        this.RunningInstances.SyncronizeCollections(collection,(a,b)=> a.Id == b.Id,
-            (src,dest) =>
+        var changed = false;
+        var inst_changed =this.RunningInstances.SyncronizeCollections(insts,(a,b)=> a.Id == b.Id,
+            (dest,src) =>
             {
+                if(dest.Status != src.Status)
+                    changed = true;
                 dest.Status = src.Status;
                 dest.JupyterUrl = src.JupyterUrl;
             });
-        
-        OnPropertyChanged(nameof(RunningInstances));
-        
-        
+
+        if (changed || inst_changed)
+        {
+            OnPropertyChanged(nameof(RunningInstances));
+        }
+            
 
         var mss = _chart_data.Keys.Where(x => !this.RunningInstances.Any(i => i.Id == x)).ToList();
 
@@ -353,50 +358,36 @@ public class MainGuiBackend : INotifyPropertyChanged
         var to_remove = new List<Instance>();
         foreach (var i in this.RunningInstances)
         {
-            var ins = await this.GetInstance(i.Id);
+            if (i.Status != "active")
+                continue;
 
-            if (ins is null)
+            var sts = await this.GetInstanceData(i);
+
+            if (!_chart_data.ContainsKey(i.Id))
             {
-                to_remove.Add(i);
+                _chart_data.Add(i.Id, new List<float>());
             }
-            else
+
+            if (sts is null)
+                return;
+            
+            var lst = _chart_data[i.Id];
+
+            var ttl = (float)sts.GpuStats.Sum(g => g.UtilizationPercentage) /
+                      (sts.GpuStats.Count == 0 ? 1 : sts.GpuStats.Count);
+            //var tst = (float)(new Random()).NextDouble() * 100;
+            lst.Add(ttl);
+            if (lst.Count > 40)
             {
-
-                if (i.Status != "active")
-                    return;
-
-                var sts = await this.GetInstanceData(i);
-
-                if (!_chart_data.ContainsKey(i.Id))
-                {
-                    _chart_data.Add(i.Id, new List<float>());
-                }
-
-                if (sts is null)
-                    return;
-                var lst = _chart_data[i.Id];
-
-                var ttl = (float)sts.GpuStats.Sum(g => g.UtilizationPercentage) /
-                          (sts.GpuStats.Count == 0 ? 1 : sts.GpuStats.Count);
-                //var tst = (float)(new Random()).NextDouble() * 100;
-                lst.Add(ttl);
-                if (lst.Count > 40)
-                {
-                    lst.RemoveAt(0);
-                }
-
-                series.Add(new LineSeries<float>
-                {
-                    Name = i.Name,
-                    Values = lst,
-                    Fill = null
-                });
+                lst.RemoveAt(0);
             }
-        }
 
-        foreach (var r in to_remove)
-        {
-            this.RunningInstances.Remove(r);
+            series.Add(new LineSeries<float>
+            {
+                Name = i.Name,
+                Values = lst,
+                Fill = null
+            });
         }
 
         this.Series = series.ToArray();
@@ -531,13 +522,9 @@ public class MainGuiBackend : INotifyPropertyChanged
         var instance =
             await _cloudClient
                 .GetInstanceAsync(insts[0]); //(await _cloudClient.ListInstancesAsync()).Find(i => i.Id == insts[0]);
-
-        //RunningInstances.Add(instance);
-
-        OnPropertyChanged(nameof(RunningInstances));
         
-
         int tries = 0;
+        
         while (instance.Status.ToLower() != "active"
                && instance.Status.ToLower() != "running")
         {
@@ -587,15 +574,18 @@ public class MainGuiBackend : INotifyPropertyChanged
     // delete the server
     public async Task DeleteServer(Instance instance)
     {
+        
+        // the timer will remove deleted instances from the list
+        OnLogMessage?.Invoke($"CLEAR");
+        OnLogMessage?.Invoke($"Terminating Instance {instance.Name}...");
         var rslt = await _cloudClient.TerminateInstancesAsync(new InstanceTerminateRequest()
             { InstanceIds = new List<string>() { instance.Id } });
-
+        OnLogMessage?.Invoke($"Terminated instance {instance.Name}.");
 
         //_launched_url = String.Empty;
 
-        IsRunning = false;
-        RunningInstances.Remove(instance);
-        OnPropertyChanged(nameof(RunningInstances));
+        
+        
         OnInstanceLaunched?.Invoke($"Instance Terminated");
     }
 

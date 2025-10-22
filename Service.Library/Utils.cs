@@ -30,10 +30,11 @@ public static class Utils
     }
 
 
-    public static void SyncronizeCollections<T>(this Collection<T> dest_collection, Collection<T> source_collection,
-        Func<T, T, bool> validItems,
+    public static bool SyncronizeCollections<T>(this IList<T> dest_collection, IList<T> source_collection,
+        Func<T, T, bool> itemEqual,
         Action<T,T>? updateItem = null)
     {
+        var changed = false;
         // Remove items not in source
         var tmp = new List<T>();
         
@@ -42,7 +43,7 @@ public static class Utils
             bool found = false;
             foreach (var ds in source_collection)
             {
-                if (validItems(ds, sr))
+                if (itemEqual(ds, sr))
                 {
                     found = true;
                     break;
@@ -51,6 +52,7 @@ public static class Utils
 
             if (!found)
             {
+                changed = true;
                 tmp.Add(sr);
             }
         }
@@ -66,7 +68,7 @@ public static class Utils
             bool found = false;
             foreach (var cl in dest_collection)
             {
-                if(validItems(cl, ds))
+                if(itemEqual(cl, ds))
                 {
                     found = true;
                     break;
@@ -75,6 +77,7 @@ public static class Utils
             
             if (!found)
             {
+                changed = true;
                 dest_collection.Add(ds);
             }
         }
@@ -84,7 +87,7 @@ public static class Utils
         {
             foreach (var cl in dest_collection)
             {
-                if (validItems(cl, ds))
+                if (itemEqual(cl, ds))
                 {
                     updateItem?.Invoke(cl, ds);
                     break;
@@ -92,8 +95,10 @@ public static class Utils
             }
         }
 
+        return changed;
 
-}
+
+    }
     
     
     
