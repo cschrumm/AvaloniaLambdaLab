@@ -31,6 +31,7 @@ dotnet build .
 
 ## Architecture
 
+Below is a high-level architecture diagram of the application:
 ![Architecture](https://github.com/cschrumm/AvaloniaLambdaLab/blob/master/Service.Library/Docs/DiagramView.png)
 
 ## Notes
