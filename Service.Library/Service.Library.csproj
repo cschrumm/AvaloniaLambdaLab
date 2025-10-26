@@ -16,15 +16,11 @@
 
     <ItemGroup>
       <PackageReference Include="SSH.NET" Version="2025.0.0" />
+      <PackageReference Include="LiveChartsCore" Version="2.0.0-rc6.1" />
+      <PackageReference Include="LiveChartsCore.SkiaSharpView" Version="2.0.0-rc6.1" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Reference Include="LiveChartsCore">
-        <HintPath>..\..\..\..\.nuget\packages\livechartscore\2.0.0-rc6.1\lib\net8.0\LiveChartsCore.dll</HintPath>
-      </Reference>
-      <Reference Include="LiveChartsCore.SkiaSharpView">
-        <HintPath>..\..\..\..\.nuget\packages\livechartscore.skiasharpview\2.0.0-rc6.1\lib\net8.0\LiveChartsCore.SkiaSharpView.dll</HintPath>
-      </Reference>
+    <ItemGroup>      
     </ItemGroup>
     
 
