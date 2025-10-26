@@ -94,8 +94,7 @@ public class SshDeploy
             var cmds = new List<string>
         {
             "sudo apt update", /* update package lists */
-            "sudo apt install git -y", /* install git */
-            "sudo apt install wget -y", /* install wget */
+            "sudo apt install -y build-essential curl wget git", /* install all the development tools git */
             "sudo mkdir -p -m 755 /etc/apt/keyrings", /* create keyrings directory */
             "wget -qO- https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo tee /etc/apt/keyrings/githubcli-archive-keyring.gpg > /dev/null",
             "sudo chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg",
