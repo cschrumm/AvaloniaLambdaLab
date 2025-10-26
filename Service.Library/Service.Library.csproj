@@ -26,5 +26,6 @@
         <HintPath>..\..\..\..\.nuget\packages\livechartscore.skiasharpview\2.0.0-rc6.1\lib\net8.0\LiveChartsCore.SkiaSharpView.dll</HintPath>
       </Reference>
     </ItemGroup>
+    
 
 </Project>
