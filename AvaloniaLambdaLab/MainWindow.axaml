@@ -92,7 +92,8 @@
             <ListBox.ItemTemplate>
                 <DataTemplate DataType="{x:Type Shared:Instance}">
                     <WrapPanel Orientation="Horizontal" LineSpacing="20" >
-                        <TextBlock TextAlignment="Center" Height="35" Text="{Binding}" Width="400" Margin="0,10,10,0"></TextBlock>
+                        <TextBlock TextAlignment="Center" Height="35" Text="{Binding}"
+                                   Width="375" Margin="0,10,10,0"></TextBlock>
                         <Button Content="Delete Instance"
                                 Width="150"
                                 Height="35"
@@ -120,7 +121,7 @@
                                   Margin="0,5,10,0">
                         </ComboBox>
                         <Button Content="Deploy Repo"
-                            Width="100" Height="35" Background="#234C64" Foreground="White"
+                            Width="150" Height="35" Background="#234C64" Foreground="White"
                                 DataContext="{Binding}"
                                 Click="Deploy_Repository_Click"
                                 Margin="0,0,10,0">
