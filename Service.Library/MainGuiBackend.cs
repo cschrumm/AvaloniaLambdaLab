@@ -40,9 +40,9 @@ public class DataForApp
 public class MainGuiBackend : INotifyPropertyChanged
 {
     // talks to the lambda cloud and manages the instance
-    private readonly LambdaCloudClient _cloudClient;
+    private LambdaCloudClient? _cloudClient;
 
-    private readonly GitHubApiClient _gitHubClient;
+    private GitHubApiClient? _gitHubClient;
 
     // used to talk to the instance api
     private readonly HttpClient _httpClient;
@@ -92,9 +92,7 @@ public class MainGuiBackend : INotifyPropertyChanged
             Directory.CreateDirectory(_app_data_path);
         }
 
-        var apiKey =
-            SecretManage
-                .GetLambdaKey(); // System.Environment.GetEnvironmentVariable("LAMBDA_KEY"); // Load from secure storage or environment variable
+      
 
         HttpClientHandler handler = new HttpClientHandler();
         // ignore ssl errors we are self signed
@@ -104,21 +102,7 @@ public class MainGuiBackend : INotifyPropertyChanged
         _httpClient.Timeout = TimeSpan.FromMinutes(5);
 
 
-        if (apiKey is null || apiKey == String.Empty)
-        {
-            throw new Exception("LAMBDA_KEY environment variable not set");
-        }
-
-        _cloudClient = new LambdaCloudClient(apiKey, _httpClient);
-
-        var gitToken = SecretManage.GetGitHubToken(); // System.Environment.GetEnvironmentVariable("GIT_SECRET");
-
-        if (gitToken is null || gitToken == String.Empty)
-        {
-            throw new Exception("GIT_SECRET environment variable not set");
-        }
-
-        _gitHubClient = new GitHubApiClient(gitToken);
+        
 
         if (!Directory.Exists(_app_data_path))
         {
@@ -289,6 +273,41 @@ public class MainGuiBackend : INotifyPropertyChanged
 
     public void Startup()
     {
+        
+        var apiKey = SecretManage.GetLambdaKey(); 
+        
+        if(SecretManage.IsSecretAvailable() == false)
+        {
+            OnLogMessage?.Invoke("Warning: Secret management not available. Make sure to set SECRET_PATH environment variable.");
+        }
+        
+        if (apiKey is null || apiKey == String.Empty)
+        {
+            OnLogMessage?.Invoke($"No API Key provided. Please provide a valid API Key.");
+            //throw new Exception("LAMBDA_KEY environment variable not set");
+        }
+        else
+        {
+            _cloudClient = new LambdaCloudClient(apiKey, _httpClient);
+        }
+
+        
+
+        var gitToken = SecretManage.GetGitHubToken(); // System.Environment.GetEnvironmentVariable("GIT_SECRET");
+
+        if (gitToken is null || gitToken == String.Empty)
+        {
+            //  throw new Exception("GIT_SECRET environment variable not set");
+            OnLogMessage?.Invoke("Warning: git secret variable not set. GitHub features will be disabled.");
+            
+        }
+        else
+        {
+            _gitHubClient = new GitHubApiClient(gitToken);
+        }
+
+        
+        
         Task.Run(async () =>
         {   
             await this.LoadLambdaData();
@@ -301,6 +320,10 @@ public class MainGuiBackend : INotifyPropertyChanged
     public async Task<List<InstanceNameDesc>> InStanceTypes()
     {
         var tmp = new List<InstanceNameDesc>();
+        
+        if (_cloudClient is null)
+            return tmp;
+        
         var rslt = await _cloudClient.ListInstanceTypesAsync();
 
         foreach (var item in rslt)
@@ -324,6 +347,8 @@ public class MainGuiBackend : INotifyPropertyChanged
     // get a list of available file systems
     public async Task<List<Filesystem>> ListFileSystems()
     {
+        if(_cloudClient is null)
+            return new List<Filesystem>();
         var rslt = await _cloudClient.ListFilesystemsAsync();
         return rslt;
     }
@@ -339,6 +364,9 @@ public class MainGuiBackend : INotifyPropertyChanged
     // get a list of ssh keys
     public async Task<List<SSHKey>> ListSshKeys()
     {
+        if(_cloudClient is null)
+            return new List<SSHKey>();
+        
         var rslt = await _cloudClient.ListSSHKeysAsync();
         return rslt;
     }
@@ -374,6 +402,8 @@ public class MainGuiBackend : INotifyPropertyChanged
     {
         List<ISeries> series = new List<ISeries>();
         
+        if(_cloudClient is null)
+            return;
         var insts =  await _cloudClient.ListInstancesAsync();
         
         //var running_ids = insts.Select(i => i.Id).ToList();
@@ -491,6 +521,8 @@ public class MainGuiBackend : INotifyPropertyChanged
 
     public async Task LoadGitHubData()
     {
+        if (_gitHubClient is null)
+            return;
         var repos = await _gitHubClient.GetAllMyRepositoriesAsync();
 
         GitRepos.Clear();
@@ -560,6 +592,9 @@ public class MainGuiBackend : INotifyPropertyChanged
 
     public async Task<List<Image>> ListImages()
     {
+        if(_cloudClient is null)
+            return new List<Image>();
+        
         var rslt = await _cloudClient.ListImagesAsync();
 
         return rslt;
@@ -573,6 +608,7 @@ public class MainGuiBackend : INotifyPropertyChanged
          *
          */
 
+        if(_cloudClient is null) throw new Exception("Cloud client not initialized");
 
         if (SelectedInstance is null) throw new Exception("No instance selected");
         if (SelectedInstance?.IntType is null) throw new Exception("Selected instance has no instance type");
@@ -633,6 +669,8 @@ public class MainGuiBackend : INotifyPropertyChanged
          *  3. SSH Key
          *
          */
+        
+        if(_cloudClient is null) throw new Exception("Cloud client not initialized");
 
         var instance = new InstanceLaunchRequest();
         instance.RegionName = Region;
@@ -656,6 +694,10 @@ public class MainGuiBackend : INotifyPropertyChanged
         // the timer will remove deleted instances from the list
         OnLogMessage?.Invoke($"CLEAR");
         OnLogMessage?.Invoke($"Terminating Instance {instance.Name}...");
+        
+        if(_cloudClient is null)
+            return;
+        
         var rslt = await _cloudClient.TerminateInstancesAsync(new InstanceTerminateRequest()
             { InstanceIds = new List<string>() { instance.Id } });
         OnLogMessage?.Invoke($"Terminated instance {instance.Name}.");
@@ -686,6 +728,7 @@ public class MainGuiBackend : INotifyPropertyChanged
 
     public async Task<Instance> GetInstance(string instanceId)
     {
+        if(_cloudClient is null) throw new Exception("Cloud client not initialized");
         var ins = await _cloudClient.GetInstanceAsync(instanceId);
         return ins;
     }
