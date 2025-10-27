@@ -16,7 +16,7 @@ public class SecretManage
     {
         if(SecretManage._lamda_key == String.Empty)
         {
-            var path = Path.Combine( _base_path, "lambda_cloude_api.txt");
+            var path = Path.Combine( _base_path, "lambda_cloud_api.txt");
             if(System.IO.File.Exists(path))
             {
                 SecretManage._lamda_key = System.IO.File.ReadAllText(path).Trim();
