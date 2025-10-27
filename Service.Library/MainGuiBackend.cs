@@ -64,6 +64,8 @@ public class MainGuiBackend : INotifyPropertyChanged
     public event Action<string>? OnInstanceLaunched;
 
     private List<Service.Library.Image> _allImages = new();
+    
+    private List<Filesystem> _allFilesystems = new();
     public event PropertyChangedEventHandler? PropertyChanged;
 
     // bound to the front end.
@@ -162,10 +164,7 @@ public class MainGuiBackend : INotifyPropertyChanged
 
         PathToKey = _dataForApp.PathToPrivateKey ?? String.Empty;
 
-        if (!_dataForApp.SelectedFileSystemId.IsNullOrEmpty())
-        {
-            SelectedFilesystem = Filesystems.FirstOrDefault(f => f.Name == _dataForApp.SelectedFileSystemId)!;
-        }
+        
 
         if (!_dataForApp.SelectedInstanceName.IsNullOrEmpty())
         {
@@ -180,6 +179,55 @@ public class MainGuiBackend : INotifyPropertyChanged
         if (!_dataForApp.SelectedImageId.IsNullOrEmpty())
         {
             SelectedImage = Images.Where(i => i.Id == _dataForApp.SelectedImageId).FirstOrDefault()!;
+            
+            if(SelectedImage is not null && SelectedImage.Region.Name != SelectedInstance.Region.Name)
+            {
+                var imgs = this.CompantibleImages(SelectedInstance);
+                
+                //SelectedImage = imgs.FirstOrDefault(i => i.Id == _dataForApp.SelectedImageId)!;
+                Images.Clear();
+                
+                foreach (var x in imgs)
+                {
+                    Images.Add(x);
+                }
+
+                if (Images.Any())
+                {
+                    SelectedImage = Images.Last();
+                }
+                data_changed = true; 
+            }
+        }
+        
+        if (!_dataForApp.SelectedFileSystemId.IsNullOrEmpty())
+        {
+            SelectedFilesystem = Filesystems.FirstOrDefault(f => f.Name == _dataForApp.SelectedFileSystemId)!;
+
+            if (SelectedFilesystem is not null)
+            {
+                // not the same region need to update
+                if (SelectedFilesystem.Region != SelectedInstance.Region)
+                {
+                    var fls = this.CompatibleFilesystems(SelectedInstance);
+                    
+                    //SelectedFilesystem = fls.FirstOrDefault(f => f.Name == _dataForApp.SelectedFileSystemId)!;
+                    Filesystems.Clear();
+                    
+                    foreach (var x in fls)
+                    {
+                        Filesystems.Add(x);
+                    }
+
+                    if (Filesystems.Any())
+                    {
+                        SelectedFilesystem = Filesystems.First();
+                    }
+                    
+                    data_changed = true; 
+                }
+                
+            }
         }
 
         if (data_changed)
@@ -338,6 +386,10 @@ public class MainGuiBackend : INotifyPropertyChanged
             {
                 if(dest.Status != src.Status)
                     changed = true;
+                
+                if(dest.Id != src.Id)
+                    changed = true;
+                dest.Ip = src.Ip;
                 dest.Status = src.Status;
                 dest.JupyterUrl = src.JupyterUrl;
             });
@@ -358,7 +410,7 @@ public class MainGuiBackend : INotifyPropertyChanged
         var to_remove = new List<Instance>();
         foreach (var i in this.RunningInstances)
         {
-            if (i.Status != "active")
+            if (i.Status != "active" || i.Id is null || i.Id == "")
                 continue;
 
             var sts = await this.GetInstanceData(i);
@@ -404,6 +456,7 @@ public class MainGuiBackend : INotifyPropertyChanged
         await Task.WhenAll(intypes, filesys, keys, images);
 
         _allImages = images.Result;
+        _allFilesystems = filesys.Result;
 
         Instances.Clear();
         Filesystems.Clear();
@@ -459,6 +512,17 @@ public class MainGuiBackend : INotifyPropertyChanged
         return ins;
     }
 
+    public List<Filesystem> CompatibleFilesystems(InstanceNameDesc instance)
+    {
+        var ins = _allFilesystems.Where(i => i.Region.Name == instance.Region.Name).ToList();
+
+        ins.Sort((x, y) => x.Name.CompareTo(y.Name));
+
+        return ins;
+    }
+    
+    
+
     public void MakeImageSelection(InstanceNameDesc instance)
     {
         var ins = this.CompantibleImages(instance);
@@ -469,14 +533,28 @@ public class MainGuiBackend : INotifyPropertyChanged
         {
             Images.Add(x);
         }
+        
+        var fsys = this.CompatibleFilesystems(instance);
+        
+        Filesystems.Clear();
+        foreach (var x in fsys)
+        {
+            Filesystems.Add(x);
+        }
 
-
+        OnPropertyChanged(nameof(Filesystems));
         OnPropertyChanged(nameof(Images));
 
-        if (this.Images.Count > 0)
+        if (this.Images.Any())
         {
             this.SelectedImage = this.Images[^1];
             OnPropertyChanged(nameof(SelectedImage));
+        }
+
+        if (this.Filesystems.Any())
+        {
+            this.SelectedFilesystem = this.Filesystems[^1];
+            OnPropertyChanged(nameof(SelectedFilesystem));
         }
     }
 

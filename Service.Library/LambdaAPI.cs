@@ -219,7 +219,7 @@ public class Filesystem
     // override ToString for easier display
     public override string ToString()
     {
-        return (Name ?? "") + " (" + Id + ")" + Region.Name ?? "";
+        return (Name ?? "") + " " + Region.Name ?? "";
     }
 }
 
