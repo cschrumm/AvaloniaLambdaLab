@@ -53,7 +53,16 @@ public class DataPoint
 
         private void OnLoaded(object sender, RoutedEventArgs e)
         {
-            GuiBackend.Startup();
+            try
+            {
+                GuiBackend.Startup();
+            }
+            catch (Exception exception)
+            {
+                Console.WriteLine(exception);
+               // throw;
+            }
+           
             _timer = new DispatcherTimer();
             _timer.Interval = TimeSpan.FromSeconds(4);
             _timer.Tick += Timer_Tick;

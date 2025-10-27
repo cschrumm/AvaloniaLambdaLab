@@ -6,6 +6,12 @@ public class SecretManage
     private static string _lamda_key = String.Empty;
     private static string _github_token = String.Empty;
     
+    // check for environment variable SECRET_PATH to override the default path /run/secrets/
+    public static bool IsSecretAvailable()
+    {
+        return System.Environment.GetEnvironmentVariable("SECRET_PATH") != null;
+    }
+    
     public static string GetLambdaKey()
     {
         if(SecretManage._lamda_key == String.Empty)
