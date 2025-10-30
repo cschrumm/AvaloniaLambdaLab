@@ -23,7 +23,7 @@ public class InstanceNameDesc
 
     public override string ToString()
     {
-        return $"{Name} - {Region.Name} -  ${IntType?.InstanceType?.PriceCentsPerHour / 100.0}/hr";
+        return $"{Name}-{Region.Name}-${IntType?.InstanceType?.PriceCentsPerHour / 100.0}/hr-storage-{IntType?.InstanceType?.Specs?.StorageGib}GB-ram-{IntType?.InstanceType?.Specs?.MemoryGib}GB-cpu-{IntType?.InstanceType?.Specs?.VCpus}-gpu-{IntType?.InstanceType?.Specs?.Gpus}";
     }
 }
 
@@ -163,32 +163,40 @@ public class MainGuiBackend : INotifyPropertyChanged
         if (!_dataForApp.SelectedImageId.IsNullOrEmpty())
         {
             SelectedImage = Images.Where(i => i.Id == _dataForApp.SelectedImageId).FirstOrDefault()!;
-            
-            if(SelectedImage is not null && SelectedImage.Region.Name != SelectedInstance.Region.Name)
-            {
-                var imgs = this.CompantibleImages(SelectedInstance);
-                
-                //SelectedImage = imgs.FirstOrDefault(i => i.Id == _dataForApp.SelectedImageId)!;
-                Images.Clear();
-                
-                foreach (var x in imgs)
-                {
-                    Images.Add(x);
-                }
 
-                if (Images.Any())
+            try
+            {
+                if(SelectedImage is not null && SelectedInstance is not null && SelectedImage.Region.Name != SelectedInstance.Region.Name)
                 {
-                    SelectedImage = Images.Last();
+                    var imgs = this.CompantibleImages(SelectedInstance);
+                
+                    //SelectedImage = imgs.FirstOrDefault(i => i.Id == _dataForApp.SelectedImageId)!;
+                    Images.Clear();
+                
+                    foreach (var x in imgs)
+                    {
+                        Images.Add(x);
+                    }
+
+                    if (Images.Any())
+                    {
+                        SelectedImage = Images.Last();
+                    }
+                    data_changed = true; 
                 }
-                data_changed = true; 
             }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+            
         }
         
         if (!_dataForApp.SelectedFileSystemId.IsNullOrEmpty())
         {
             SelectedFilesystem = Filesystems.FirstOrDefault(f => f.Name == _dataForApp.SelectedFileSystemId)!;
 
-            if (SelectedFilesystem is not null)
+            if (SelectedFilesystem is not null && SelectedInstance is not null)
             {
                 // not the same region need to update
                 if (SelectedFilesystem.Region != SelectedInstance.Region)
@@ -546,7 +554,7 @@ public class MainGuiBackend : INotifyPropertyChanged
 
     public List<Filesystem> CompatibleFilesystems(InstanceNameDesc instance)
     {
-        var ins = _allFilesystems.Where(i => i.Region.Name == instance.Region.Name).ToList();
+        var ins = _allFilesystems.Where(i => (i.Region?.Name ?? "") == (instance.Region?.Name ?? "")).ToList();
 
         ins.Sort((x, y) => x.Name.CompareTo(y.Name));
 

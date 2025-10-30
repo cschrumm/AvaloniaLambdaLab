@@ -37,7 +37,7 @@ public class Instance
     public List<FilesystemMountEntry>? FileSystemMounts { get; set; }
 
     [JsonPropertyName("region")]
-    public required Region Region { get; set; }
+    public  Region? Region { get; set; }
 
     [JsonPropertyName("instance_type")]
     public required InstanceType InstanceType { get; set; }
@@ -61,7 +61,7 @@ public class Instance
 
     public override string ToString()
     {
-        return $"{Name} - {Status} - {InstanceType.Name} - {Region.Name}";
+        return $"{Name} - {Status} - {InstanceType.Name} - {Region?.Name} - {Ip}";
     }
 }
 
@@ -212,14 +212,14 @@ public class Filesystem
     [JsonPropertyName("is_in_use")]
     public bool IsInUse { get; set; } = false;
 
-    [JsonPropertyName("region")] public Region Region { get; set; } = null!;
+    [JsonPropertyName("region")] public Region? Region { get; set; } = null!;
 
     [JsonPropertyName("bytes_used")] public long? BytesUsed { get; set; } = 0;
     
     // override ToString for easier display
     public override string ToString()
     {
-        return (Name ?? "") + " " + Region.Name ?? "";
+        return (Name ?? "") + " " + Region?.Name ?? "";
     }
 }
 
