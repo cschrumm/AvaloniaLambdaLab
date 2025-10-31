@@ -607,6 +607,18 @@ public class MainGuiBackend : INotifyPropertyChanged
 
         return rslt;
     }
+
+
+    public void LaunchTerminal(Instance instance)
+    {
+        if (this.PathToKey.IsNullOrEmpty())
+            return;
+        
+        var trm = new TerminalLauncher(instance.Ip, 22, "ubuntu",this.PathToKey);
+        trm.Run(new []{ "empty"});
+        
+    }
+    
     // create a server
 
     public async Task StartInstance()
