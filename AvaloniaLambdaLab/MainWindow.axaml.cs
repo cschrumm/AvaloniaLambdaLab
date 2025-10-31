@@ -215,6 +215,29 @@ public class DataPoint
            
         }
 
+        private void LaunchTerminal_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var ins = sender as Button;
+            
+                if (ins != null && ins.DataContext is Instance)
+                {
+                    var instance = ins.DataContext as Instance;
+                    if (instance != null)
+                    {
+                        GuiBackend.LaunchTerminal(instance);
+                    }
+                }
+
+            }
+            catch (Exception exception)
+            {
+                Console.WriteLine(exception);
+                //throw;
+            }
+        }
+
         private void StopButton_Click(object sender, RoutedEventArgs e)
         {
             IsRunning = false;

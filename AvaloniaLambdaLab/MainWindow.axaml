@@ -134,6 +134,14 @@
                                 DataContext="{Binding}" 
                                 Click="CopyToServerButton_Click"
                                 Margin="0,0,10,0"></Button>
+                        <Button Content="Launch Terminal" 
+                                Width="150"
+                                Height="35"
+                                Background="#234C6A"
+                                Foreground="White"
+                                DataContext="{Binding}" 
+                                Click="LaunchTerminal_Click"
+                                Margin="0,0,10,0"></Button>
                     </WrapPanel>
                 </DataTemplate>
             </ListBox.ItemTemplate>
